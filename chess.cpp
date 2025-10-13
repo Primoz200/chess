@@ -1,8 +1,24 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map> 
 
 using namespace std;
+
+map<int, string> figure = {
+    {0, "-"},
+    {1, "p"},
+    {2, "r"},
+    {3, "n"},
+    {4, "b"},
+    {5, "q"},
+    {6, "k"},
+    {7, "P"},
+    {8, "R"},
+    {9, "N"},
+    {10, "B"},
+    {11, "Q"},
+    {12, "K"}};
 
 void setUpBoard(vector<vector<int>>  &v) {
     for(int i = 0; i < 3; i++){
@@ -24,13 +40,25 @@ void setUpBoard(vector<vector<int>>  &v) {
 }
 
 void printBoard(vector<vector<int>> v) {
-    for(auto vrstica: v){
-        for(auto polje: vrstica){
-            cout << polje << " ";
-            if(polje < 10){ cout << " ";} 
-        }
-        cout << endl;
+    cout << "   ";
+    for (int k = 0; k < 8; k++) {
+        cout << string(1, 'A' + k);
+        cout << " "; 
     }
+    cout << endl;
+    for (int i = 0; i < v.size(); i++) {
+        cout << (8-i) << ": ";
+        for (int j = 0; j < v[i].size(); j++) {
+            cout << figure[v[i][j]] << " ";
+            // if (v[i][j] < 10) { cout << " "; }
+        }
+    cout << endl;
+}
+}
+
+void evalCurMove(string move, int number) {
+    string piece = string(1, move[0]);
+
 }
 
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
@@ -55,6 +83,8 @@ int main() {
         }
 
         cin >> curMove;
+        evalCurMove(curMove, nOfMoves);
+        
         nOfMoves++;
     }
 }
