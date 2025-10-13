@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <map> 
+#include <array>
 
 using namespace std;
 
@@ -39,7 +40,7 @@ void setUpBoard(vector<vector<int>>  &v) {
     }
 }
 
-void printBoard(vector<vector<int>> v) {
+void printBoard(vector<vector<int>> &v) {
     cout << "   ";
     for (int k = 0; k < 8; k++) {
         cout << string(1, 'A' + k);
@@ -56,9 +57,62 @@ void printBoard(vector<vector<int>> v) {
 }
 }
 
-void evalCurMove(string move, int number) {
-    string piece = string(1, move[0]);
+array<int, 4> enumerateMove(string move) { //vrne indekse v tabeli. pozcija 0 stolpec,1 vrstica (ker e4 in ne 4e) za zacetni square, 2,3 za koncni
+    return {move[0] - 'a', 7 - (move[1] - '1'), move[2] - 'a', 7 - (move[3] - '1')};
+}
 
+bool kings(vector<vector<int>> &board, array<int, 4> move, bool color){return false;}
+
+bool pawns(vector<vector<int>> &board, array<int, 4> move, bool color){  //returns true if move is valid and moves piece if it is
+    // for(int i: move) {
+    //     cout << i << " ";
+    // }
+    if(!color) {
+        if(move[3] - move[1] >= 3) {
+            return false;
+        }else if(move[3] - move[1] == 2){       //move by 2
+            if(move[1] != 1) return false;   //not seventh rank
+            else if(move[0] != move[2]) return false;   //not same column   
+            else if(board[move[3]][move[2]] != 0 || board[move[3]+1][move[2]] != 0) {return false; } //check if space is empty
+            else {
+                board[move[3]][move[2]] = board[move[1]][move[0]];
+                board[move[1]][move[0]] = 0;
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+bool rooks(vector<vector<int>> &board, array<int, 4> move, bool color){return false;}
+bool knights(vector<vector<int>> &board, array<int, 4> move, bool color){return false;}
+bool bishops(vector<vector<int>> &board, array<int, 4> move, bool color) {return false;}
+bool queens(vector<vector<int>> &board, array<int, 4> move, bool color) {return false;}
+
+bool makeCurMove(vector<vector<int>> &board, array<int, 4> enumMove, bool color) { // returns true if move was made
+    int figura = board[enumMove[1]][enumMove[0]];
+    bool valid = false;
+    switch (figura % 6) {
+        case 0:
+            valid = kings(board, enumMove, color);
+            break;
+        case 1:
+            valid = pawns(board, enumMove, color);
+            break;
+        case 2:
+            valid = rooks(board, enumMove, color);
+            break;
+        case 3:
+            valid = knights(board, enumMove, color);
+            break;
+        case 4:
+            valid = bishops(board, enumMove, color);
+            break;
+        case 5:
+            valid = queens(board, enumMove, color);
+    }
+    return valid;
 }
 
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
@@ -69,21 +123,21 @@ int main() {
     setUpBoard(board);
 
     bool endOfGame = false;
-    int nOfMoves = 0;
+    int nOfMoves = 1;
     string curMove = "";
 
 
     while(!endOfGame) {
         printBoard(board);
-        if(nOfMoves % 2 == 0) {
+        if(nOfMoves % 2 == 1) {
             cout << "White to move: \n";
         }
         else{
-            cout << "Black to move \n";
+            cout << "Black to move: \n";
         }
 
         cin >> curMove;
-        evalCurMove(curMove, nOfMoves);
+        makeCurMove(board, enumerateMove(curMove), nOfMoves % 2 == 1? true : false);
         
         nOfMoves++;
     }
