@@ -1,0 +1,4 @@
+-pawn func:
+    en passant
+    check for check
+    
