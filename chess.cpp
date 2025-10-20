@@ -63,23 +63,37 @@ class Move {
         int fromY;
         int toX;
         int toY;
+        Move* prev;
 
-        Move(int x1, int y1, int x2, int y2) {
+        Move(int x1, int y1, int x2, int y2, Move* pr) {
             fromX = x1;
             fromY = y1;
             toX = x2;
             toY = y2;
+            prev = pr;
+        }
+
+        void toString(){
+            cout << fromX << " " << fromY  << " " << toX << " " << toY << endl;
+            cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
         }
 
 };
 
-// array<int, 4> enumerateMove(string move) { //vrne indekse v tabeli. pozcija 0 stolpec,1 vrstica (ker e4 in ne 4e) za zacetni square, 2,3 za koncni
-//     return {move[0] - 'a', 7 - (move[1] - '1'), move[2] - 'a', 7 - (move[3] - '1')};
-// }
 
-Move string2Move(string moveS) {
-    Move move(moveS[0] - 'a', 7 - (moveS[1] - '1'), moveS[2] - 'a', 7 - (moveS[3] - '1'));
-    return move;
+void string2Move(string moveS, Move* move) {
+    move->fromX = moveS[0] - 'a';
+    move->fromY = 7 - (moveS[1] - '1');
+    move->toX = moveS[2] - 'a';
+    move->toY = 7 - (moveS[3] - '1');
+}
+
+void updatePrevBoard(Move* move){
+    move->prev->prev == NULL;
+    move->prev->fromX = move->fromX;
+    move->prev->fromY = move->fromY;
+    move->prev->toX = move->toX;
+    move->prev->toY = move->toY;
 }
 
 void makeMove(vector<vector<int>> &board, Move &move) {
@@ -147,7 +161,17 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                 makeMove(board, move);               
                 return true;
             }
+            else if(board[move.toY][move.toX] == 0){
+                if((move.prev)->fromY == 1 && (move.prev)->toY == 3){
+                    if((move.prev)->fromX == move.toX){
+                        makeMove(board, move);
+                        board[move.toY+1][move.toX]=0;
+                        return true;
+                    }
+                }
+            }
         } 
+
     }
     else {          //black pawns
         //if(board[move.fromY][move.fromX] != 7) return false;
@@ -169,9 +193,18 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                     return true;
                 }
             }else if(abs(move.fromX - move.toX) != 1) return false;
-            else if(board[move.toY][move.toX] <= 6) {     //if smaller than 6 => is a white piece
+            else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
                 makeMove(board, move);               
                 return true;
+            }
+            else if(board[move.toY][move.toX] == 0){
+                if((move.prev)->fromY == 6 && (move.prev)->toY == 4){
+                    if((move.prev)->fromX == move.toX){
+                        makeMove(board, move);
+                        board[move.toY-1][move.toX]=0;
+                        return true;
+                    }
+                }
             }
         } 
     }
@@ -286,7 +319,9 @@ int main() {
 
     bool endOfGame = false;
     int nOfMoves = 1;
-    string curMove = "";
+    string strMove = "";
+    Move prMove(0, 0, 0, 0, NULL);
+    Move move(0, 0, 0, 0, &prMove);  
 
 
     while(!endOfGame) {
@@ -298,8 +333,12 @@ int main() {
             cout << "Black to move: \n";
         }
 
-        cin >> curMove;
-        while(!evalCurMove(board, string2Move(curMove), nOfMoves % 2 == 1? true : false)){
+        cin >> strMove;
+        updatePrevBoard(&move);
+        string2Move(strMove, &move);
+        move.toString();
+        while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false)){
+
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
                 cout << "White to move: \n";
@@ -307,7 +346,9 @@ int main() {
             else{
                 cout << "Black to move: \n";
             }
-            cin >> curMove;
+            cin >> strMove;
+            string2Move(strMove, &move);
+            move.toString();
         }
         
         nOfMoves++;
