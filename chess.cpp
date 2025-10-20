@@ -63,39 +63,38 @@ class Move {
         int fromY;
         int toX;
         int toY;
+        Move* prev;
 
-        Move(int x1, int y1, int x2, int y2) {
+        Move(int x1, int y1, int x2, int y2, Move* pr) {
             fromX = x1;
             fromY = y1;
             toX = x2;
             toY = y2;
-            //prev = pr;
+            prev = pr;
         }
 
         void toString(){
             cout << fromX << " " << fromY  << " " << toX << " " << toY << endl;
-            //cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
+            cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
         }
 
 };
 
-Move string2Move(string moveS) {
-    Move move(moveS[0] - 'a', 7 - (moveS[1] - '1'), moveS[2] - 'a', 7 - (moveS[3] - '1'), NULL);
-    return move;
+
+void string2Move(string moveS, Move* move) {
+    move->fromX = moveS[0] - 'a';
+    move->fromY = 7 - (moveS[1] - '1');
+    move->toX = moveS[2] - 'a';
+    move->toY = 7 - (moveS[3] - '1');
 }
 
-// void string2Move(string moveS, Move* move) {
-//     move->prev->prev == NULL;
-//     move->prev->fromX = move->fromX;
-//     move->prev->fromY = move->fromY;
-//     move->prev->toX = move->toX;
-//     move->prev->toY = move->toY;
-
-//     move->fromX = moveS[0] - 'a';
-//     move->fromY = 7 - (moveS[1] - '1');
-//     move->toX = moveS[2] - 'a';
-//     move->toY = 7 - (moveS[3] - '1');
-// }
+void updatePrevBoard(Move* move){
+    move->prev->prev == NULL;
+    move->prev->fromX = move->fromX;
+    move->prev->fromY = move->fromY;
+    move->prev->toX = move->toX;
+    move->prev->toY = move->toY;
+}
 
 void makeMove(vector<vector<int>> &board, Move &move) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
@@ -139,6 +138,7 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
     if(!insideBoard(move)) return false;
 
     if(color) {     //white pawns
+        if(board[move.fromY][move.fromX] != 1) return false;
         if(move.fromY - move.toY > 2) {
             return false;
         }else if(move.fromY - move.toY == 2){       //move by 2
@@ -164,6 +164,7 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
         } 
     }
     else {          //black pawns
+        if(board[move.fromY][move.fromX] != 7) return false;
         if(move.toY - move.fromY > 2) {
             return false;
         }else if(move.toY - move.fromY == 2){       //move by 2
@@ -299,7 +300,9 @@ int main() {
     bool endOfGame = false;
     int nOfMoves = 1;
     string strMove = "";
-    Move move(0, 0, 0, 0);  
+    Move prMove(0, 0, 0, 0, NULL);
+    Move move(0, 0, 0, 0, &prMove);  
+
 
     while(!endOfGame) {
         printBoard(board);
@@ -311,7 +314,10 @@ int main() {
         }
 
         cin >> strMove;
-        while(!evalCurMove(board, string2Move(strMove), nOfMoves % 2 == 1? true : false)){
+        updatePrevBoard(&move);
+        string2Move(strMove, &move);
+        move.toString();
+        while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false)){
 
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
@@ -321,6 +327,8 @@ int main() {
                 cout << "Black to move: \n";
             }
             cin >> strMove;
+            string2Move(strMove, &move);
+            move.toString();
         }
         
         nOfMoves++;
