@@ -138,7 +138,6 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
     if(!insideBoard(move)) return false;
 
     if(color) {     //white pawns
-        if(board[move.fromY][move.fromX] != 1) return false;
         if(move.fromY - move.toY > 2) {
             return false;
         }else if(move.fromY - move.toY == 2){       //move by 2
@@ -161,10 +160,19 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                 makeMove(board, move);               
                 return true;
             }
+            else if(board[move.toY][move.toX] == 0){
+                if((move.prev)->fromY == 1 && (move.prev)->toY == 3){
+                    if((move.prev)->fromX == move.toX){
+                        makeMove(board, move);
+                        board[move.toY+1][move.toX]=0;
+                        return true;
+                    }
+                }
+            }
         } 
+
     }
     else {          //black pawns
-        if(board[move.fromY][move.fromX] != 7) return false;
         if(move.toY - move.fromY > 2) {
             return false;
         }else if(move.toY - move.fromY == 2){       //move by 2
@@ -183,9 +191,18 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                     return true;
                 }
             }else if(abs(move.fromX - move.toX) != 1) return false;
-            else if(board[move.toY][move.toX] <= 6) {     //if smaller than 6 => is a white piece
+            else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
                 makeMove(board, move);               
                 return true;
+            }
+            else if(board[move.toY][move.toX] == 0){
+                if((move.prev)->fromY == 6 && (move.prev)->toY == 4){
+                    if((move.prev)->fromX == move.toX){
+                        makeMove(board, move);
+                        board[move.toY-1][move.toX]=0;
+                        return true;
+                    }
+                }
             }
         } 
     }
@@ -267,6 +284,7 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
 
 bool evalCurMove(vector<vector<int>> &board, Move move, bool color) { // returns true if move was made
     int figura = board[move.fromY][move.fromX];
+    if(figura == 0) return false;
     bool valid = false;
     switch (figura % 6) {
         case 0:
