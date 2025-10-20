@@ -336,7 +336,6 @@ int main() {
         cin >> strMove;
         updatePrevBoard(&move);
         string2Move(strMove, &move);
-        move.toString();
         while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false)){
 
             cout << "invalid move. "; 
