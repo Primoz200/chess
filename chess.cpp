@@ -69,18 +69,33 @@ class Move {
             fromY = y1;
             toX = x2;
             toY = y2;
+            //prev = pr;
+        }
+
+        void toString(){
+            cout << fromX << " " << fromY  << " " << toX << " " << toY << endl;
+            //cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
         }
 
 };
 
-// array<int, 4> enumerateMove(string move) { //vrne indekse v tabeli. pozcija 0 stolpec,1 vrstica (ker e4 in ne 4e) za zacetni square, 2,3 za koncni
-//     return {move[0] - 'a', 7 - (move[1] - '1'), move[2] - 'a', 7 - (move[3] - '1')};
-// }
-
 Move string2Move(string moveS) {
-    Move move(moveS[0] - 'a', 7 - (moveS[1] - '1'), moveS[2] - 'a', 7 - (moveS[3] - '1'));
+    Move move(moveS[0] - 'a', 7 - (moveS[1] - '1'), moveS[2] - 'a', 7 - (moveS[3] - '1'), NULL);
     return move;
 }
+
+// void string2Move(string moveS, Move* move) {
+//     move->prev->prev == NULL;
+//     move->prev->fromX = move->fromX;
+//     move->prev->fromY = move->fromY;
+//     move->prev->toX = move->toX;
+//     move->prev->toY = move->toY;
+
+//     move->fromX = moveS[0] - 'a';
+//     move->fromY = 7 - (moveS[1] - '1');
+//     move->toX = moveS[2] - 'a';
+//     move->toY = 7 - (moveS[3] - '1');
+// }
 
 void makeMove(vector<vector<int>> &board, Move &move) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
@@ -283,8 +298,8 @@ int main() {
 
     bool endOfGame = false;
     int nOfMoves = 1;
-    string curMove = "";
-
+    string strMove = "";
+    Move move(0, 0, 0, 0);  
 
     while(!endOfGame) {
         printBoard(board);
@@ -295,8 +310,9 @@ int main() {
             cout << "Black to move: \n";
         }
 
-        cin >> curMove;
-        while(!evalCurMove(board, string2Move(curMove), nOfMoves % 2 == 1? true : false)){
+        cin >> strMove;
+        while(!evalCurMove(board, string2Move(strMove), nOfMoves % 2 == 1? true : false)){
+
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
                 cout << "White to move: \n";
@@ -304,7 +320,7 @@ int main() {
             else{
                 cout << "Black to move: \n";
             }
-            cin >> curMove;
+            cin >> strMove;
         }
         
         nOfMoves++;
