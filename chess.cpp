@@ -3,6 +3,9 @@
 #include <string>
 #include <map> 
 #include <array>
+#include <stdint.h>
+#include "bitBoards.h"
+
 
 using namespace std;
 
@@ -40,23 +43,6 @@ void setUpBoard(vector<vector<int>>  &v) {
     }
 }
 
-void printBoard(vector<vector<int>> &v) {
-    cout << "   ";
-    for (int k = 0; k < 8; k++) {
-        cout << string(1, 'A' + k);
-        cout << " "; 
-    }
-    cout << endl;
-    for (int i = 0; i < v.size(); i++) {
-        cout << (8-i) << ": ";
-        for (int j = 0; j < v[i].size(); j++) {
-            cout << figure[v[i][j]] << " ";
-            // if (v[i][j] < 10) { cout << " "; }
-        }
-    cout << endl;
-    }
-}
-
 class Move {
     public:
         int fromX;
@@ -80,6 +66,32 @@ class Move {
 
 };
 
+void printBoard(vector<vector<int>> &v) {
+    cout << "   ";
+    for (int k = 0; k < 8; k++) {
+        cout << string(1, 'A' + k);
+        cout << " "; 
+    }
+    cout << endl;
+    for (int i = 0; i < v.size(); i++) {
+        cout << (8-i) << ": ";
+        for (int j = 0; j < v[i].size(); j++) {
+            cout << figure[v[i][j]] << " ";
+            // if (v[i][j] < 10) { cout << " "; }
+        }
+    cout << endl;
+    }
+}
+
+void printBitboard(uint64_t a) {
+    for(int i = 0; i < 64; i++){
+        
+        if( i % 8 ==  0) cout << "\n";
+        cout << ((a>>i) & 1L) << " ";
+        
+    }
+
+}
 
 void string2Move(string moveS, Move* move) {
     move->fromX = moveS[0] - 'a';
@@ -99,6 +111,8 @@ void updatePrevBoard(Move* move){
 void makeMove(vector<vector<int>> &board, Move &move) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = 0;
+
+
 }
 
 bool checkDestSquareAndMove(vector<vector<int>> &board, Move &move, bool color){
@@ -396,7 +410,7 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-        
+        printBitboard(attackBitBoards(board)[12]);
         nOfMoves++;
     }
 }
