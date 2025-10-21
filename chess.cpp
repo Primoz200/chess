@@ -128,10 +128,57 @@ bool insideBoard(Move &move) {                              //checks that its in
     return true;
 }
 
-bool kings(vector<vector<int>> &board, Move &move, bool color){
+bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> &castlingRights){
     if(!insideBoard(move)) return false;
 
-    return checkDestSquareAndMove(board, move, color);
+    if(abs(move.fromX - move.toX) <= 1 && abs(move.fromY - move.toY) <= 1){
+        if(checkDestSquareAndMove(board, move, color)){
+            if(color){castlingRights.first = false;}
+            else{ castlingRights.second = false;}
+            return true;
+        }
+    }
+
+
+
+    if(move.fromY == move.toY){
+        if(move.toX == 6 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0){
+            if(color && castlingRights.first){
+                if(board[move.toY][move.toX+1] == 2){       //rook
+                    makeMove(board, move);                  //moves king
+                    board[move.toY][move.toX-1] = 2;      //moves rook
+                    board[move.toY][move.toX+1] = 0;
+                    return true;
+                }
+            }else if(!color && castlingRights.second){
+                if(board[move.toY][move.toX+1] == 8){       //rook
+                    makeMove(board, move);                  //moves king
+                    board[move.toY][move.toX-1] = 8;      //moves rook
+                    board[move.toY][move.toX+1] = 0;
+                    return true;
+                }
+            }
+        }
+        if(move.toX == 2 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0 && board[move.toY][move.toX+1] == 0){
+            if(color && castlingRights.first){
+                if(board[move.toY][move.toX-2] == 2){       //rook
+                    makeMove(board, move);                  //moves king
+                    board[move.toY][move.toX+1] = 2;      //moves rook
+                    board[move.toY][move.toX-2] = 0;
+                    return true;
+                }
+            }else if(!color && castlingRights.second){
+                if(board[move.toY][move.toX-2] == 8){       //rook
+                    makeMove(board, move);                  //moves king
+                    board[move.toY][move.toX+1] = 8;      //moves rook
+                    board[move.toY][move.toX-2] = 0;
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
@@ -282,13 +329,13 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
 
 }
 
-bool evalCurMove(vector<vector<int>> &board, Move move, bool color) { // returns true if move was made
+bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
     int figura = board[move.fromY][move.fromX];
     if(figura == 0) return false;
     bool valid = false;
     switch (figura % 6) {
         case 0:
-            valid = kings(board, move, color);
+            valid = kings(board, move, color, castlingRights);
             break;
         case 1:
             valid = pawns(board, move, color);
@@ -320,6 +367,7 @@ int main() {
     string strMove = "";
     Move prMove(0, 0, 0, 0, NULL);
     Move move(0, 0, 0, 0, &prMove);  
+    pair<bool, bool> castlingRights = {true, true};
 
 
     while(!endOfGame) {
@@ -334,8 +382,7 @@ int main() {
         cin >> strMove;
         updatePrevBoard(&move);
         string2Move(strMove, &move);
-        move.toString();
-        while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false)){
+        while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights)){
 
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
@@ -346,7 +393,6 @@ int main() {
             }
             cin >> strMove;
             string2Move(strMove, &move);
-            move.toString();
         }
         
         nOfMoves++;
