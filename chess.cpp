@@ -215,14 +215,20 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                 if(board[move.toY][move.toX] != 0) return false;
                 else {
                     makeMove(board, move);
+                    if(move.toY == 0){
+                        board[move.toY][move.toX] = 5;  //queening
+                    }         
                     return true;
                 }
             }else if(abs(move.fromX - move.toX) != 1) return false;
             else if(board[move.toY][move.toX] >= 7) {     
-                makeMove(board, move);               
+                makeMove(board, move);
+                if(move.toY == 0){
+                    board[move.toY][move.toX] = 5;  //queening
+                }               
                 return true;
             }
-            else if(board[move.toY][move.toX] == 0){
+            else if(board[move.toY][move.toX] == 0){                        //en passant
                 if((move.prev)->fromY == 1 && (move.prev)->toY == 3){
                     if((move.prev)->fromX == move.toX){
                         makeMove(board, move);
@@ -251,14 +257,20 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
                 if(board[move.toY][move.toX] != 0) return false;
                 else {
                     makeMove(board, move);
+                    if(move.toY == 7){
+                        board[move.toY][move.toX] = 11;  //queening
+                    }         
                     return true;
                 }
             }else if(abs(move.fromX - move.toX) != 1) return false;
             else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
-                makeMove(board, move);               
+                makeMove(board, move);
+                if(move.toY == 7){
+                    board[move.toY][move.toX] = 11;  //queening
+                }         
                 return true;
             }
-            else if(board[move.toY][move.toX] == 0){
+            else if(board[move.toY][move.toX] == 0){                                //en passant
                 if((move.prev)->fromY == 6 && (move.prev)->toY == 4){
                     if((move.prev)->fromX == move.toX){
                         makeMove(board, move);
@@ -410,7 +422,7 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-        printBitboard(attackBitBoards(board)[12]);
+        //printBitboard(attackBitBoards(board).first);
         nOfMoves++;
     }
 }
