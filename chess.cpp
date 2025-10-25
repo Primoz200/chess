@@ -41,6 +41,8 @@ void setUpBoard(vector<vector<int>>  &v) {
         v[1][i] = 7;
         v[6][i] = 1;
     }
+
+
 }
 
 class Move {
@@ -197,15 +199,14 @@ bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> 
 
 bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
     if(!insideBoard(move)) return false;
-
+    
     if(color) {     //white pawns
-        //if(board[move.fromY][move.fromX] != 1) return false;
         if(move.fromY - move.toY > 2) {
             return false;
         }else if(move.fromY - move.toY == 2){       //move by 2
             if(move.fromY != 6) return false;   //not seventh rank
             else if(move.fromX != move.toX) return false;   //not same column   
-            else if(board[move.toY][move.toX] != 0 || board[move.toY-1][move.toX] != 0) return false; //check if space is empty
+            else if(board[move.toY][move.toX] != 0 || board[move.toY+1][move.toX] != 0) return false; //check if space is empty
             else {
                 makeMove(board, move);
                 return true;
@@ -241,7 +242,6 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
 
     }
     else {          //black pawns
-        //if(board[move.fromY][move.fromX] != 7) return false;
         if(move.toY - move.fromY > 2) {
             return false;
         }else if(move.toY - move.fromY == 2){       //move by 2
@@ -422,7 +422,8 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-        //printBitboard(attackBitBoards(board).first);
+
+        printBitboard(attackBitBoards(board).first);
         nOfMoves++;
     }
 }
