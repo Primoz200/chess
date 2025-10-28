@@ -110,24 +110,44 @@ void updatePrevBoard(Move* move){
     move->prev->toY = move->toY;
 }
 
-void makeMove(vector<vector<int>> &board, Move &move) {
+bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){
+    int targetNr = color ? 6 : 12;
+    uint64_t bit = 0;
+
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++){ 
+            if(board[i][j] == targetNr) {bit |= (1LL << getBitNr(j, i)); break;}
+        }
+    }
+    uint64_t attackBoard = color ? attackBitBoards(board).second : attackBitBoards(board).first;
+
+    if(attackBoard & bit) return true;
+
+    return false;
+}
+
+bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = 0;
 
+   if(kingInCheck(board, move, color)) {
+        board[move.fromY][move.fromX] = board[move.toY][move.toX];
+        board[move.toY][move.toX] = 0;
+        return false;
+    }
 
+    return true;
 }
 
 bool checkDestSquareAndMove(vector<vector<int>> &board, Move &move, bool color){
     if (color) {
         if (board[move.toY][move.toX] > 6 || board[move.toY][move.toX] == 0) {
-            makeMove(board, move);
-            return true;
+
+            return makeMove(board, move, color);
+
         }
-    }else{
-        if(board[move.toY][move.toX] < 7){
-            makeMove(board, move);
-            return true;
-        }
+    }else if(board[move.toY][move.toX] < 7){
+        return makeMove(board, move, color);
     }
 
     return false;
@@ -161,34 +181,38 @@ bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> 
         if(move.toX == 6 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0){
             if(color && castlingRights.first){
                 if(board[move.toY][move.toX+1] == 2){       //rook
-                    makeMove(board, move);                  //moves king
+                    if(checkDestSquareAndMove(board, move, color)){                  //moves king
                     board[move.toY][move.toX-1] = 2;      //moves rook
                     board[move.toY][move.toX+1] = 0;
                     return true;
+                    }
                 }
             }else if(!color && castlingRights.second){
                 if(board[move.toY][move.toX+1] == 8){       //rook
-                    makeMove(board, move);                  //moves king
+                    if(checkDestSquareAndMove(board, move, color)){                  //moves king
                     board[move.toY][move.toX-1] = 8;      //moves rook
                     board[move.toY][move.toX+1] = 0;
                     return true;
+                    }
                 }
             }
         }
         if(move.toX == 2 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0 && board[move.toY][move.toX+1] == 0){
             if(color && castlingRights.first){
                 if(board[move.toY][move.toX-2] == 2){       //rook
-                    makeMove(board, move);                  //moves king
-                    board[move.toY][move.toX+1] = 2;      //moves rook
-                    board[move.toY][move.toX-2] = 0;
-                    return true;
+                    if(checkDestSquareAndMove(board, move, color)){                  //moves king
+                        board[move.toY][move.toX+1] = 2;      //moves rook
+                        board[move.toY][move.toX-2] = 0;
+                        return true;
+                    }
                 }
             }else if(!color && castlingRights.second){
                 if(board[move.toY][move.toX-2] == 8){       //rook
-                    makeMove(board, move);                  //moves king
-                    board[move.toY][move.toX+1] = 8;      //moves rook
-                    board[move.toY][move.toX-2] = 0;
-                    return true;
+                    if(checkDestSquareAndMove(board, move, color)){                  //moves king
+                        board[move.toY][move.toX+1] = 8;      //moves rook
+                        board[move.toY][move.toX-2] = 0;
+                        return true;
+                    }
                 }
             }
         }
@@ -208,33 +232,36 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
             else if(move.fromX != move.toX) return false;   //not same column   
             else if(board[move.toY][move.toX] != 0 || board[move.toY+1][move.toX] != 0) return false; //check if space is empty
             else {
-                makeMove(board, move);
-                return true;
+                return checkDestSquareAndMove(board, move, color);
             }
         }else if(move.fromY - move.toY == 1){           //move by 1
             if(move.fromX == move.toX){                 //same file
                 if(board[move.toY][move.toX] != 0) return false;
                 else {
-                    makeMove(board, move);
-                    if(move.toY == 0){
-                        board[move.toY][move.toX] = 5;  //queening
-                    }         
-                    return true;
+                    if(checkDestSquareAndMove(board, move, color)){
+                        if(move.toY == 0){
+                            board[move.toY][move.toX] = 5;  //queening
+                        } 
+                        return true;
+                    }
                 }
             }else if(abs(move.fromX - move.toX) != 1) return false;
             else if(board[move.toY][move.toX] >= 7) {     
-                makeMove(board, move);
-                if(move.toY == 0){
-                    board[move.toY][move.toX] = 5;  //queening
-                }               
-                return true;
+                if(checkDestSquareAndMove(board, move, color)){
+                    if(move.toY == 0){
+                        board[move.toY][move.toX] = 5;  //queening
+                    }
+                    return true;
+                }
+
             }
             else if(board[move.toY][move.toX] == 0){                        //en passant
                 if((move.prev)->fromY == 1 && (move.prev)->toY == 3){
                     if((move.prev)->fromX == move.toX){
-                        makeMove(board, move);
-                        board[move.toY+1][move.toX]=0;
-                        return true;
+                        if(checkDestSquareAndMove(board, move, color)){
+                            board[move.toY+1][move.toX]=0;
+                            return true;
+                        }
                     }
                 }
             }
@@ -249,33 +276,35 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
             else if(move.fromX != move.toX) return false;   //not same column   
             else if(board[move.toY][move.toX] != 0 || board[move.toY-1][move.toX] != 0) {return false; } //check if space is empty
             else {
-                makeMove(board, move);
-                return true;
+                return checkDestSquareAndMove(board, move, color);
             }
         }else if(move.toY - move.fromY == 1){           //move by 1
             if(move.fromX == move.toX){                 //same file
                 if(board[move.toY][move.toX] != 0) return false;
                 else {
-                    makeMove(board, move);
+                    if(checkDestSquareAndMove(board, move, color)){
+                        if(move.toY == 7){
+                            board[move.toY][move.toX] = 11;  //queening
+                        }         
+                        return true;
+                    }
+                }
+            }else if(abs(move.fromX - move.toX) != 1) return false;
+            else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
+                if(checkDestSquareAndMove(board, move, color)){
                     if(move.toY == 7){
                         board[move.toY][move.toX] = 11;  //queening
                     }         
                     return true;
                 }
-            }else if(abs(move.fromX - move.toX) != 1) return false;
-            else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
-                makeMove(board, move);
-                if(move.toY == 7){
-                    board[move.toY][move.toX] = 11;  //queening
-                }         
-                return true;
             }
             else if(board[move.toY][move.toX] == 0){                                //en passant
                 if((move.prev)->fromY == 6 && (move.prev)->toY == 4){
                     if((move.prev)->fromX == move.toX){
-                        makeMove(board, move);
-                        board[move.toY-1][move.toX]=0;
-                        return true;
+                        if(checkDestSquareAndMove(board, move, color)){
+                            board[move.toY-1][move.toX]=0;
+                            return true;
+                        }
                     }
                 }
             }
@@ -423,7 +452,6 @@ int main() {
             string2Move(strMove, &move);
         }
 
-        printBitboard(attackBitBoards(board).first);
         nOfMoves++;
     }
 }
