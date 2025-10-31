@@ -90,9 +90,7 @@ void printBitboard(uint64_t a) {
         
         if( i % 8 ==  0) cout << "\n";
         cout << ((a>>i) & 1L) << " ";
-        
     }
-
 }
 
 void string2Move(string moveS, Move* move) {
@@ -112,19 +110,51 @@ void updatePrevBoard(Move* move){
 
 bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){
     int targetNr = color ? 6 : 12;
-    uint64_t bit = 0;
+    uint64_t kingPos = 0;
 
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++){ 
-            if(board[i][j] == targetNr) {bit |= (1LL << getBitNr(j, i)); break;}
+            if(board[i][j] == targetNr) {setBit(kingPos, getBitNr(j, i)); break;}
         }
     }
     uint64_t attackBoard = color ? attackBitBoards(board).second : attackBitBoards(board).first;
 
-    if(attackBoard & bit) return true;
+    if(attackBoard & kingPos) return true;
 
     return false;
 }
+
+// bool checkMate(vector<vector<int>> &board, bool color){             //color=barva zadnje poteze
+//     int targetNr = color ? 12 : 6;
+//     uint64_t bitBoardForMate = 0;
+
+//     for(int i = 0; i < 8; i++) {
+//         for(int j = 0; j < 8; j++){ 
+//             if(board[i][j] == targetNr){
+//                 for(int8_t k1 = -1; k1 <= 1; k1++){
+//                     for(int8_t k2 = -1; k2 <= 1; k2++){
+//                         int bit = getBitNr(j+k1, i+k2);
+//                         if(bit >= 0 && bit <=63) {
+//                             setBit(bitBoardForMate, bit);
+//                         }
+//                     }
+//                 }
+//                 break;
+//             }
+//         }
+//     }
+//     uint64_t attackBoard = color ? attackBitBoards(board).first : attackBitBoards(board).second;
+
+//     printBitboard(attackBoard); cout << "\n";
+//     printBitboard(bitBoardForMate);
+
+//     if(attackBoard & bitBoardForMate == bitBoardForMate) {
+//         string s = color ? "White" : "Black";
+//         cout << s << " wins";
+//         return true;
+//     }
+//     return false;
+// }
 
 bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
@@ -134,6 +164,9 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
         board[move.fromY][move.fromX] = board[move.toY][move.toX];
         board[move.toY][move.toX] = 0;
         return false;
+    }
+    if(kingInCheck(board, move, !color)){
+        cout << "Check \n";
     }
 
     return true;
@@ -415,6 +448,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
 
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
+
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
@@ -425,7 +459,6 @@ int main() {
     Move prMove(0, 0, 0, 0, NULL);
     Move move(0, 0, 0, 0, &prMove);  
     pair<bool, bool> castlingRights = {true, true};
-
 
     while(!endOfGame) {
         printBoard(board);
@@ -451,7 +484,7 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-
+        // if(checkMate(board, nOfMoves % 2 == 1? true : false)) cout << "neki"; 
         nOfMoves++;
     }
 }

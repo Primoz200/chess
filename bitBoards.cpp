@@ -14,7 +14,7 @@ inline int getBitNr(int x, int y){
 }
 
 void setBit(uint64_t &piece, int bit){
-    piece |= (1L << bit);
+    piece |= (1LL << bit);
 }
 
 void resetBit(uint64_t &piece, int bit){
