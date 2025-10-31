@@ -66,6 +66,11 @@ class Move {
             cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
         }
 
+        bool equals(Move &move){
+            return fromX == move.fromX && fromY == move.fromY &&
+                   toX == move.toX && toY == move.toY;
+        }
+
 };
 
 void printBoard(vector<vector<int>> &v) {
@@ -124,38 +129,6 @@ bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){
     return false;
 }
 
-// bool checkMate(vector<vector<int>> &board, bool color){             //color=barva zadnje poteze
-//     int targetNr = color ? 12 : 6;
-//     uint64_t bitBoardForMate = 0;
-
-//     for(int i = 0; i < 8; i++) {
-//         for(int j = 0; j < 8; j++){ 
-//             if(board[i][j] == targetNr){
-//                 for(int8_t k1 = -1; k1 <= 1; k1++){
-//                     for(int8_t k2 = -1; k2 <= 1; k2++){
-//                         int bit = getBitNr(j+k1, i+k2);
-//                         if(bit >= 0 && bit <=63) {
-//                             setBit(bitBoardForMate, bit);
-//                         }
-//                     }
-//                 }
-//                 break;
-//             }
-//         }
-//     }
-//     uint64_t attackBoard = color ? attackBitBoards(board).first : attackBitBoards(board).second;
-
-//     printBitboard(attackBoard); cout << "\n";
-//     printBitboard(bitBoardForMate);
-
-//     if(attackBoard & bitBoardForMate == bitBoardForMate) {
-//         string s = color ? "White" : "Black";
-//         cout << s << " wins";
-//         return true;
-//     }
-//     return false;
-// }
-
 bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = 0;
@@ -172,6 +145,13 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     return true;
 }
 
+bool checkIfMoveInVector(Move &move, vector<Move> &moves){
+    for(int i = 0; i < moves.size(); i++){
+        if(move.equals(moves[i])) return true;
+    }
+    return false;
+}
+
 bool checkDestSquareAndMove(vector<vector<int>> &board, Move &move, bool color){
     if (color) {
         if (board[move.toY][move.toX] > 6 || board[move.toY][move.toX] == 0) {
@@ -180,7 +160,7 @@ bool checkDestSquareAndMove(vector<vector<int>> &board, Move &move, bool color){
 
         }
     }else if(board[move.toY][move.toX] < 7){
-        return makeMove(board, move, color);
+        return  makeMove(board, move, color);
     }
 
     return false;
@@ -195,6 +175,30 @@ bool insideBoard(Move &move) {                              //checks that its in
 
     if(move.fromX == move.toX && move.fromY == move.toY) return false;
     return true;
+}
+
+void generateSlidingMoves(vector<vector<int>> &board, vector<Move> &initial, int i, int j, int dirx, int diry){    
+    int x = dirx, y = diry;
+    
+    bool colorOfAttackingPiece = board[i][j] < 7 ? true : false; 
+    while(i + y >= 0 && i + y <= 7 && j + x >= 0 && j + x <= 7){
+        if(board[i+y][j+x] == 0){
+            initial.push_back({j, i, j+x, i+y, NULL});
+        }else if(colorOfAttackingPiece){
+            if(board[i+y][j+x] >= 7){
+                initial.push_back({j, i, j+x, i+y, NULL});
+            }
+            break;
+        }else{
+            if(board[i+y][j+x] <= 6){
+                initial.push_back({j, i, j+x, i+y, NULL});
+            }
+            break;
+        }
+        x+=dirx;
+        y+=diry;
+    }
+
 }
 
 bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> &castlingRights){
@@ -368,10 +372,17 @@ bool rookCheckPath(vector<vector<int>> &board, Move &move) {
 
 bool rooks(vector<vector<int>> &board, Move &move, bool color){
     if(!insideBoard(move)) return false;
+    vector<Move> moves;
+    generateSlidingMoves(board, moves, move.fromX, move.fromY, 1, 1);
+    generateSlidingMoves(board, moves, move.fromX, move.fromY, 1, -1);
+    generateSlidingMoves(board, moves, move.fromX, move.fromY, -1, 1);
+    generateSlidingMoves(board, moves, move.fromX, move.fromY, -1, -1);
 
-    if(!rookCheckPath(board, move)) return false; 
+    if(checkIfMoveInVector(move, moves)){
+        checkDestSquareAndMove(board, move, color);
+    }
 
-    return checkDestSquareAndMove(board, move, color);
+    return false;
 }
 
 bool knights(vector<vector<int>> &board, Move &move, bool color){
@@ -416,7 +427,6 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
     if(!bishopCheckPath(board, move) && !rookCheckPath(board, move)) return false;
 
     return checkDestSquareAndMove(board, move, color);
-
 }
 
 bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
@@ -484,7 +494,7 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-        // if(checkMate(board, nOfMoves % 2 == 1? true : false)) cout << "neki"; 
+
         nOfMoves++;
     }
 }
