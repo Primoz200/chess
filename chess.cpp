@@ -147,11 +147,11 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     return true;
 }
 
-bool checkIfMoveInVector(Move &move, vector<Move> &moves){
+int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value is the index of the move + 1 to make enPassant checks easier while also being valid if index = 0
     for(int i = 0; i < moves.size(); i++){
-        if(move.equals(moves[i])) return true;
+        if(move.equals(moves[i])) return i+1;
     }
-    return false;
+    return 0;
 }
 
 bool insideBoard(Move &move) {                              //checks that its inside the board and that it does move
@@ -247,93 +247,65 @@ bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> 
 
 bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
     if(!insideBoard(move)) return false;
+    vector<Move> moves;
+    int indEnPassant = -1;
+
+    if(color){
+        if(board[move.fromY-1][move.fromX] == 0){
+            
+            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-1, NULL});
+            if(board[move.fromY-2][move.fromX] == 0 && move.fromY == 6){
+                moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-2, NULL});
+            }
+        }
+        if(board[move.fromY-1][move.fromX+1] >= 7){
+            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY-1, NULL});
+        }
+        if(board[move.fromY-1][move.fromX-1] >= 7){
+            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL});
+        }
+        if(move.prev->fromY == 1 && move.prev->toY == 3){
+            if(move.fromY == 3){
+                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
+                indEnPassant = moves.size(); //has to be the size vlaue, because the check function returns index+1
+            }
+        }
+    }else {
+        if(board[move.fromY+1][move.fromX] == 0){
+            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+1, NULL});
+            if(board[move.fromY+2][move.fromX] == 0 && move.fromY == 1){
+                moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+2, NULL});
+            }
+        }
+        if(board[move.fromY+1][move.fromX+1] <= 6 && board[move.fromY+1][move.fromX+1] != 0){
+            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY+1, NULL});
+        }
+        if(board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
+            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL});
+        }
+        if(move.prev->fromY == 6 && move.prev->toY == 4){
+            if(move.fromY == 4){
+                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL});
+                indEnPassant = moves.size(); //has to be the size vlaue, because the check function returns index+1
+            }
+        }
+    }
     
-    if(color) {     //white pawns
-        if(move.fromY - move.toY > 2) {
-            return false;
-        }else if(move.fromY - move.toY == 2){       //move by 2
-            if(move.fromY != 6) return false;   //not seventh rank
-            else if(move.fromX != move.toX) return false;   //not same column   
-            else if(board[move.toY][move.toX] != 0 || board[move.toY+1][move.toX] != 0) return false; //check if space is empty
-            else {
-                return makeMove(board, move, color);
+    int logicalValue = checkIfMoveInVector(move, moves);
+    if(logicalValue){
+        if(makeMove(board, move, color)){
+            if(move.toY == 7 || move.toY == 0){
+                board[move.toY][move.toX] = color ? 5 : 11;
             }
-        }else if(move.fromY - move.toY == 1){           //move by 1
-            if(move.fromX == move.toX){                 //same file
-                if(board[move.toY][move.toX] != 0) return false;
-                else {
-                    if(makeMove(board, move, color)){
-                        if(move.toY == 0){
-                            board[move.toY][move.toX] = 5;  //queening
-                        } 
-                        return true;
-                    }
-                }
-            }else if(abs(move.fromX - move.toX) != 1) return false;
-            else if(board[move.toY][move.toX] >= 7) {     
-                if(makeMove(board, move, color)){
-                    if(move.toY == 0){
-                        board[move.toY][move.toX] = 5;  //queening
-                    }
-                    return true;
-                }
-
+            if(logicalValue == indEnPassant){
+                cout << "neki";
+                if(color) board[move.toY+1][move.toX] = 0;
+                else board[move.toY-1][move.toX] = 0;
             }
-            else if(board[move.toY][move.toX] == 0){                        //en passant
-                if((move.prev)->fromY == 1 && (move.prev)->toY == 3){
-                    if((move.prev)->fromX == move.toX){
-                        if(makeMove(board, move, color)){
-                            board[move.toY+1][move.toX]=0;
-                            return true;
-                        }
-                    }
-                }
-            }
-        } 
-
+            return true;            
+        }
     }
-    else {          //black pawns
-        if(move.toY - move.fromY > 2) {
-            return false;
-        }else if(move.toY - move.fromY == 2){       //move by 2
-            if(move.fromY != 1) return false;   //not seventh rank
-            else if(move.fromX != move.toX) return false;   //not same column   
-            else if(board[move.toY][move.toX] != 0 || board[move.toY-1][move.toX] != 0) {return false; } //check if space is empty
-            else {
-                return makeMove(board, move, color);
-            }
-        }else if(move.toY - move.fromY == 1){           //move by 1
-            if(move.fromX == move.toX){                 //same file
-                if(board[move.toY][move.toX] != 0) return false;
-                else {
-                    if(makeMove(board, move, color)){
-                        if(move.toY == 7){
-                            board[move.toY][move.toX] = 11;  //queening
-                        }         
-                        return true;
-                    }
-                }
-            }else if(abs(move.fromX - move.toX) != 1) return false;
-            else if(board[move.toY][move.toX] <= 6 &&board[move.toY][move.toX] != 0) {     //if smaller than 6 => is a white piece
-                if(makeMove(board, move, color)){
-                    if(move.toY == 7){
-                        board[move.toY][move.toX] = 11;  //queening
-                    }         
-                    return true;
-                }
-            }
-            else if(board[move.toY][move.toX] == 0){                                //en passant
-                if((move.prev)->fromY == 6 && (move.prev)->toY == 4){
-                    if((move.prev)->fromX == move.toX){
-                        if(makeMove(board, move, color)){
-                            board[move.toY-1][move.toX]=0;
-                            return true;
-                        }
-                    }
-                }
-            }
-        } 
-    }
+    
     return false;
 }
 

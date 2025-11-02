@@ -1,4 +1,6 @@
-a2a4
-b7b5
-a1a3
+e2e4
+a7a5
+e4e5
+f7f5
+e5f6
 ^C
