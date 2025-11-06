@@ -309,6 +309,8 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
     return false;
 }
 
+
+
 bool rooks(vector<vector<int>> &board, Move &move, bool color){
     if(!insideBoard(move)) return false;
     vector<Move> moves;
@@ -324,10 +326,9 @@ bool rooks(vector<vector<int>> &board, Move &move, bool color){
     return false;
 }
 
-bool knights(vector<vector<int>> &board, Move &move, bool color){
-    if(!insideBoard(move)) return false;
+void generateKnightMoves(vector<vector<int>> &board, vector<Move> initial, Move &move){
+    bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
 
-    vector<Move> moves;
     for(int i = -2; i <= 2; i++){
         for(int j = -2; j <= 2; j++){
             if(abs(i*j) != 2) continue;
@@ -336,15 +337,23 @@ bool knights(vector<vector<int>> &board, Move &move, bool color){
 
             if(color){
                 if(board[move.toY+i][move.toX+j] >= 7 || board[move.toY+i][move.toX+j] == 0){
-                    moves.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
+                    initial.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
                 }
             }else{
                 if(board[move.toY+i][move.toX+j] <= 6){
-                    moves.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
+                    initial.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
                 }
             }
         }
     }
+
+}
+
+bool knights(vector<vector<int>> &board, Move &move, bool color){
+    if(!insideBoard(move)) return false;
+
+    vector<Move> moves;
+    generateKnightMoves(board, moves, move);
     
     if(checkIfMoveInVector(move, moves)){
         return makeMove(board, move, color);
@@ -436,10 +445,11 @@ int main() {
             cout << "Black to move: \n";
         }
 
+
         cin >> strMove;
         updatePrevBoard(&move);
         string2Move(strMove, &move);
-        while(!evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights)){
+        while(!insideBoard(move) || !evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights)){
 
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
