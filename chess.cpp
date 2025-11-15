@@ -73,6 +73,10 @@ class Move {
                    toX == move.toX && toY == move.toY;
         }
 
+        Move reverseMove(){
+            return {toX, toY, fromX, fromY, NULL};
+        }
+
 };
 
 void printBoard(vector<vector<int>> &v) {
@@ -115,7 +119,7 @@ void updatePrevBoard(Move* move){
     move->prev->toY = move->toY;
 }
 
-bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){
+bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){ //retruns true if king of color is in check
     int targetNr = color ? 6 : 12;
     uint64_t kingPos = 0;
 
@@ -140,10 +144,6 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
         board[move.toY][move.toX] = 0;
         return false;
     }
-    if(kingInCheck(board, move, !color)){
-        cout << "Check \n";
-    }
-
     return true;
 }
 
@@ -188,68 +188,92 @@ void generateSlidingMoves(vector<vector<int>> &board, vector<Move> &initial, int
 
 }
 
+void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move){  //dont look, ugly code
+    bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
+
+    vector<vector<int>> tempBoard = board;
+    for(int x = -1; x <= 1; x++){
+        for(int y = -1; y <= 1; y++){
+            if(getBitNr(move.fromX+x, move.fromY+y) >= 64 || getBitNr(move.fromX+x, move.fromY+y) < 0) continue;    //if clause is true the square is outside of the board
+            if(x == 0 && y == 0) continue;
+            if(tempBoard[move.fromY+y][move.fromX+x] == 0){
+                tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
+                tempBoard[move.fromY][move.fromX] = 0;
+                if(!kingInCheck){
+                    moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
+                }
+                tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
+                tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];
+            }else if(tempBoard[move.fromY+y][move.fromX+x] <= 6){
+                if(color) continue;
+            }else if(tempBoard[move.fromY+y][move.fromX+x] >= 7){
+                if(!color) continue;   
+        }
+            tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
+            tempBoard[move.fromY][move.fromX] = 0;
+            if(!kingInCheck(board, move, color)){
+                moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
+            }
+            tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
+            tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];    
+        }
+    }
+}
+
 bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> &castlingRights){
     if(!insideBoard(move)) return false;
+    vector<Move> moves;
 
-    if(abs(move.fromX - move.toX) <= 1 && abs(move.fromY - move.toY) <= 1){
-        if(makeMove(board, move, color)){
-            if(color){castlingRights.first = false;}
-            else{ castlingRights.second = false;}
-            return true;
-        }
+    generateKingMoves(board, moves, move);
+    if(checkIfMoveInVector(move, moves)){
+        return makeMove(board, move, color);
     }
-
-
-
-    if(move.fromY == move.toY){
-        if(move.toX == 6 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0){
-            if(color && castlingRights.first){
-                if(board[move.toY][move.toX+1] == 2){       //rook
-                    if(makeMove(board, move, color)){                  //moves king
-                    board[move.toY][move.toX-1] = 2;      //moves rook
-                    board[move.toY][move.toX+1] = 0;
-                    return true;
-                    }
-                }
-            }else if(!color && castlingRights.second){
-                if(board[move.toY][move.toX+1] == 8){       //rook
-                    if(makeMove(board, move, color)){                  //moves king
-                    board[move.toY][move.toX-1] = 8;      //moves rook
-                    board[move.toY][move.toX+1] = 0;
-                    return true;
-                    }
-                }
-            }
-        }
-        if(move.toX == 2 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0 && board[move.toY][move.toX+1] == 0){
-            if(color && castlingRights.first){
-                if(board[move.toY][move.toX-2] == 2){       //rook
-                    if(makeMove(board, move, color)){                  //moves king
-                        board[move.toY][move.toX+1] = 2;      //moves rook
-                        board[move.toY][move.toX-2] = 0;
-                        return true;
-                    }
-                }
-            }else if(!color && castlingRights.second){
-                if(board[move.toY][move.toX-2] == 8){       //rook
-                    if(makeMove(board, move, color)){                  //moves king
-                        board[move.toY][move.toX+1] = 8;      //moves rook
-                        board[move.toY][move.toX-2] = 0;
-                        return true;
-                    }
-                }
-            }
-        }
-    }
+    
+    // if(move.fromY == move.toY){
+    //     if(move.toX == 6 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0){
+    //         if(color && castlingRights.first){
+    //             if(board[move.toY][move.toX+1] == 2){       //rook
+    //                 if(makeMove(board, move, color)){                  //moves king
+    //                 board[move.toY][move.toX-1] = 2;      //moves rook
+    //                 board[move.toY][move.toX+1] = 0;
+    //                 return true;
+    //                 }
+    //             }
+    //         }else if(!color && castlingRights.second){
+    //             if(board[move.toY][move.toX+1] == 8){       //rook
+    //                 if(makeMove(board, move, color)){                  //moves king
+    //                 board[move.toY][move.toX-1] = 8;      //moves rook
+    //                 board[move.toY][move.toX+1] = 0;
+    //                 return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if(move.toX == 2 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0 && board[move.toY][move.toX+1] == 0){
+    //         if(color && castlingRights.first){
+    //             if(board[move.toY][move.toX-2] == 2){       //rook
+    //                 if(makeMove(board, move, color)){                  //moves king
+    //                     board[move.toY][move.toX+1] = 2;      //moves rook
+    //                     board[move.toY][move.toX-2] = 0;
+    //                     return true;
+    //                 }
+    //             }
+    //         }else if(!color && castlingRights.second){
+    //             if(board[move.toY][move.toX-2] == 8){       //rook
+    //                 if(makeMove(board, move, color)){                  //moves king
+    //                     board[move.toY][move.toX+1] = 8;      //moves rook
+    //                     board[move.toY][move.toX-2] = 0;
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     return false;
 }
 
-bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-    int indEnPassant = -1;
-
+void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, bool color){
     if(color){
         if(board[move.fromY-1][move.fromX] == 0){
             
@@ -267,7 +291,6 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
         if(move.prev->fromY == 1 && move.prev->toY == 3){
             if(move.fromY == 3){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
-                indEnPassant = moves.size(); //has to be the size vlaue, because the check function returns index+1
             }
         }
     }else {
@@ -286,30 +309,31 @@ bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns t
         if(move.prev->fromY == 6 && move.prev->toY == 4){
             if(move.fromY == 4){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL});
-                indEnPassant = moves.size(); //has to be the size vlaue, because the check function returns index+1
             }
         }
     }
-    
+}
+
+bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
+    if(!insideBoard(move)) return false;
+    vector<Move> moves;
+
+    generatePawnMoves(board, moves, move, color);
     int logicalValue = checkIfMoveInVector(move, moves);
     if(logicalValue){
         if(makeMove(board, move, color)){
             if(move.toY == 7 || move.toY == 0){
                 board[move.toY][move.toX] = color ? 5 : 11;
             }
-            if(logicalValue == indEnPassant){
-                cout << "neki";
+            if(logicalValue == moves.size()){
                 if(color) board[move.toY+1][move.toX] = 0;
                 else board[move.toY-1][move.toX] = 0;
             }
             return true;            
         }
     }
-    
     return false;
 }
-
-
 
 bool rooks(vector<vector<int>> &board, Move &move, bool color){
     if(!insideBoard(move)) return false;
@@ -326,27 +350,27 @@ bool rooks(vector<vector<int>> &board, Move &move, bool color){
     return false;
 }
 
-void generateKnightMoves(vector<vector<int>> &board, vector<Move> initial, Move &move){
+void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move &move){
     bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
 
     for(int i = -2; i <= 2; i++){
         for(int j = -2; j <= 2; j++){
             if(abs(i*j) != 2) continue;
             
-            if(move.toX+j < 0 || move.toX+j > 7 || move.toY+i < 0 || move.toY+i > 7) continue;
+            if(move.fromX+j < 0 || move.fromX+j > 7 || move.fromY+i < 0 || move.fromY+i > 7) continue;
 
             if(color){
-                if(board[move.toY+i][move.toX+j] >= 7 || board[move.toY+i][move.toX+j] == 0){
+                if(board[move.fromY+i][move.fromX+j] >= 7 || board[move.fromY+i][move.fromX+j] == 0){
                     initial.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
                 }
             }else{
-                if(board[move.toY+i][move.toX+j] <= 6){
+                if(board[move.fromY+i][move.fromX+j] <= 6){
                     initial.push_back({move.fromX, move.fromY, move.fromX+j, move.fromY+i, NULL});
                 }
             }
         }
     }
-
+    
 }
 
 bool knights(vector<vector<int>> &board, Move &move, bool color){
@@ -354,7 +378,7 @@ bool knights(vector<vector<int>> &board, Move &move, bool color){
 
     vector<Move> moves;
     generateKnightMoves(board, moves, move);
-    
+
     if(checkIfMoveInVector(move, moves)){
         return makeMove(board, move, color);
     }
@@ -392,6 +416,11 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
         return makeMove(board, move, color);
     }
 
+    return false;
+}
+
+bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat){
+    vector<Move> moves;
     return false;
 }
 
@@ -438,6 +467,12 @@ int main() {
 
     while(!endOfGame) {
         printBoard(board);
+        if(kingInCheck(board, move, nOfMoves % 2 == 1? true : false)){
+            if(endOfGame = checkForMate(board, nOfMoves % 2 == 1? true : false)){       //SETS end of game
+                cout << "CHECKMATE";
+                break;
+            }
+        }
         if(nOfMoves % 2 == 1) {
             cout << "White to move: \n";
         }
