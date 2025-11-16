@@ -414,18 +414,15 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
     return false;
 }
 
-bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat, Move lastMove, pair<bool, bool> &castlingRights){
-    vector<Move> moves;
+void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move lastMove, pair<bool, bool> &castlingRights){
     vector<vector<int>> tempBoard = board;
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
-    int kingUnderThreat = colorUnderThreat ? 6 : 12;
-    int generatedMoves = 0;
+    moves.clear();
 
-
-    for(int i = 0; i <= 7; i++){        //need to find king since we dont have a reference move
+    for(int i = 0; i <= 7; i++){       
         for(int j = 0; j <= 7; j++){
             if(board[i][j] == 0) continue;
-            if((colorUnderThreat && board[i][j] <= 6) || (!colorUnderThreat && board[i][j] >= 7)){
+            if((color && board[i][j] <= 6) || (!color && board[i][j] >= 7)){
                 refMove.fromX = j;
                 refMove.fromY = i;
                 switch (board[i][j] % 6) {
@@ -433,7 +430,7 @@ bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat, Move lastMo
                         generateKingMoves(board, moves, refMove, castlingRights);
                         break;
                     case 1:
-                        generatePawnMoves(board, moves, refMove, colorUnderThreat);
+                        generatePawnMoves(board, moves, refMove, color);
                         break;
                     case 2:
                         generateSlidingMoves(board, moves, j, i, 0, 1);
@@ -459,18 +456,9 @@ bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat, Move lastMo
                         }
                         break;
                 }
-
-                for(int a = generatedMoves; a < moves.size(); a++){
-                    if(makeMove(tempBoard, moves[a], colorUnderThreat)){
-                        printBoard(tempBoard);
-                        return false;
-                    } 
-                }
-                generatedMoves = moves.size();
-            } 
+            }
         }
     }
-    return true;
 }
 
 bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
@@ -479,7 +467,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
     bool valid = false;
     switch (figura % 6) {
         case 0:
-            valid = kings(board, move, color, castlingRights);
+            kings(board, move, color, castlingRights);
             break;
         case 1:
             valid = pawns(board, move, color);
@@ -508,6 +496,7 @@ int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
 
+    vector<Move> moves;
     bool endOfGame = false;
     int nOfMoves = 1;
     string strMove = "";
@@ -517,12 +506,19 @@ int main() {
 
     while(!endOfGame) {
         printBoard(board);
-        if(kingInCheck(board, move, nOfMoves % 2 == 1? true : false)){
-            if(checkForMate(board, nOfMoves % 2 == 1? true : false, move, castlingRights)){       
-                cout << "CHECKMATE \n";
+        generateMoves(board, nOfMoves % 2 == 1? true : false, moves, move, castlingRights);
+
+        if(moves.empty()){
+            if(kingInCheck(board, move, nOfMoves % 2 == 1? true : false)){
+                cout << "CHECKMATE\n";
+                break;
+            }
+            else{
+                cout << "STALEMATE";
                 break;
             }
         }
+        
         if(nOfMoves % 2 == 1) {
             cout << "White to move: \n";
         }
@@ -534,7 +530,7 @@ int main() {
         cin >> strMove;
         updatePrevBoard(&move);
         string2Move(strMove, &move);
-        while(!insideBoard(move) || !evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights)){
+        while(!insideBoard(move) || !checkIfMoveInVector(move, moves)){
 
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
@@ -546,7 +542,8 @@ int main() {
             cin >> strMove;
             string2Move(strMove, &move);
         }
-
+        
+        evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights);
         nOfMoves++;
     }
 }
