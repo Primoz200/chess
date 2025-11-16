@@ -188,7 +188,7 @@ void generateSlidingMoves(vector<vector<int>> &board, vector<Move> &initial, int
 
 }
 
-void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move){  //dont look, ugly code
+void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, pair<bool, bool> &castlingRights){
     bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
 
     vector<vector<int>> tempBoard = board;
@@ -199,7 +199,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
             if(tempBoard[move.fromY+y][move.fromX+x] == 0){
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
                 tempBoard[move.fromY][move.fromX] = 0;
-                if(!kingInCheck){
+                if(!kingInCheck(tempBoard, move, color)){
                     moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
                 }
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
@@ -211,11 +211,38 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         }
             tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
             tempBoard[move.fromY][move.fromX] = 0;
-            if(!kingInCheck(board, move, color)){
+            if(!kingInCheck(tempBoard, move, color)){
                 moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
             }
             tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
             tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];    
+        }
+    }
+
+    int rookNr = color ? 2 : 8;
+    int kingNr = color ? 6 : 12;
+    int rank = color ? 7 : 0;
+    if(((color && castlingRights.first) || (!color && castlingRights.second)) && !kingInCheck(board, move, color)){
+        if(move.fromX == 4 && move.fromY == rank){
+            if(tempBoard[move.fromY][move.fromX+1] == 0 && tempBoard[move.fromY][move.fromX+2] == 0 && tempBoard[move.fromY][move.fromX+3] == rookNr){
+                tempBoard[move.fromY][move.fromX+1] = kingNr;
+                tempBoard[move.fromY][move.fromX] = 0;
+                if(!kingInCheck(tempBoard, move, color)){
+                    moves.push_back({move.fromX, move.fromY, move.fromX+2, move.fromY, NULL});
+                }
+                tempBoard[move.fromY][move.fromX+1] = 0;
+                tempBoard[move.fromY][move.fromX] = kingNr;
+            }
+            
+            if(tempBoard[move.fromY][move.fromX-1] == 0 && tempBoard[move.fromY][move.fromX-2] == 0 && tempBoard[move.fromY][move.fromX-3] == 0 && tempBoard[move.fromY][move.fromX-4] == rookNr){
+                tempBoard[move.fromY][move.fromX-1] = kingNr;
+                tempBoard[move.fromY][move.fromX] = 0;
+                if(!kingInCheck(tempBoard, move, color)){
+                    moves.push_back({move.fromX, move.fromY, move.fromX-2, move.fromY, NULL});
+                }
+                tempBoard[move.fromY][move.fromX-1] = 0;
+                tempBoard[move.fromY][move.fromX] = kingNr;
+            }
         }
     }
 }
@@ -224,51 +251,19 @@ bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> 
     if(!insideBoard(move)) return false;
     vector<Move> moves;
 
-    generateKingMoves(board, moves, move);
+    generateKingMoves(board, moves, move, castlingRights);
     if(checkIfMoveInVector(move, moves)){
+        if(move.fromX-move.toX == 2) {
+            board[move.fromY][move.fromX-1] = board[move.fromY][move.fromX-4];
+            board[move.fromY][move.fromX-4] = 0;
+        }
+        if(move.toX-move.fromX == 2) {
+            board[move.fromY][move.fromX+1] = board[move.fromY][move.fromX+3];
+            board[move.fromY][move.fromX+3] = 0;
+        }        
+        color ? castlingRights.first = false : castlingRights.second = false;
         return makeMove(board, move, color);
     }
-    
-    // if(move.fromY == move.toY){
-    //     if(move.toX == 6 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0){
-    //         if(color && castlingRights.first){
-    //             if(board[move.toY][move.toX+1] == 2){       //rook
-    //                 if(makeMove(board, move, color)){                  //moves king
-    //                 board[move.toY][move.toX-1] = 2;      //moves rook
-    //                 board[move.toY][move.toX+1] = 0;
-    //                 return true;
-    //                 }
-    //             }
-    //         }else if(!color && castlingRights.second){
-    //             if(board[move.toY][move.toX+1] == 8){       //rook
-    //                 if(makeMove(board, move, color)){                  //moves king
-    //                 board[move.toY][move.toX-1] = 8;      //moves rook
-    //                 board[move.toY][move.toX+1] = 0;
-    //                 return true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     if(move.toX == 2 && board[move.toY][move.toX] == 0 && board[move.toY][move.toX-1] == 0 && board[move.toY][move.toX+1] == 0){
-    //         if(color && castlingRights.first){
-    //             if(board[move.toY][move.toX-2] == 2){       //rook
-    //                 if(makeMove(board, move, color)){                  //moves king
-    //                     board[move.toY][move.toX+1] = 2;      //moves rook
-    //                     board[move.toY][move.toX-2] = 0;
-    //                     return true;
-    //                 }
-    //             }
-    //         }else if(!color && castlingRights.second){
-    //             if(board[move.toY][move.toX-2] == 8){       //rook
-    //                 if(makeMove(board, move, color)){                  //moves king
-    //                     board[move.toY][move.toX+1] = 8;      //moves rook
-    //                     board[move.toY][move.toX-2] = 0;
-    //                     return true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     return false;
 }
@@ -419,9 +414,63 @@ bool queens(vector<vector<int>> &board, Move &move, bool color) {
     return false;
 }
 
-bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat){
+bool checkForMate(vector<vector<int>> &board, bool colorUnderThreat, Move lastMove, pair<bool, bool> &castlingRights){
     vector<Move> moves;
-    return false;
+    vector<vector<int>> tempBoard = board;
+    Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
+    int kingUnderThreat = colorUnderThreat ? 6 : 12;
+    int generatedMoves = 0;
+
+
+    for(int i = 0; i <= 7; i++){        //need to find king since we dont have a reference move
+        for(int j = 0; j <= 7; j++){
+            if(board[i][j] == 0) continue;
+            if((colorUnderThreat && board[i][j] <= 6) || (!colorUnderThreat && board[i][j] >= 7)){
+                refMove.fromX = j;
+                refMove.fromY = i;
+                switch (board[i][j] % 6) {
+                    case 0:
+                        generateKingMoves(board, moves, refMove, castlingRights);
+                        break;
+                    case 1:
+                        generatePawnMoves(board, moves, refMove, colorUnderThreat);
+                        break;
+                    case 2:
+                        generateSlidingMoves(board, moves, j, i, 0, 1);
+                        generateSlidingMoves(board, moves, j, i, 0, -1);
+                        generateSlidingMoves(board, moves, j, i, 1, 0);
+                        generateSlidingMoves(board, moves, j, i, -1, 0);
+                        break;
+                    case 3:
+                        generateKnightMoves(board, moves, refMove);
+                        break;
+                    case 4:
+                        generateSlidingMoves(board, moves, j, i, 1, 1);
+                        generateSlidingMoves(board, moves, j, i, 1, -1);
+                        generateSlidingMoves(board, moves, j, i, -1, 1);
+                        generateSlidingMoves(board, moves, j, i, -1, -1);
+                        break;
+                    case 5:
+                        for(int k1 = -1; k1 <= 1; k1++){
+                            for(int k2 = -1; k2 <= 1; k2++){
+                                if(k1==0 && k2==0) continue;
+                                generateSlidingMoves(board, moves, j, i, k1, k2);
+                            }
+                        }
+                        break;
+                }
+
+                for(int a = generatedMoves; a < moves.size(); a++){
+                    if(makeMove(tempBoard, moves[a], colorUnderThreat)){
+                        printBoard(tempBoard);
+                        return false;
+                    } 
+                }
+                generatedMoves = moves.size();
+            } 
+        }
+    }
+    return true;
 }
 
 bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
@@ -446,6 +495,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
             break;
         case 5:
             valid = queens(board, move, color);
+            break;
     }
 
     return valid;
@@ -468,8 +518,8 @@ int main() {
     while(!endOfGame) {
         printBoard(board);
         if(kingInCheck(board, move, nOfMoves % 2 == 1? true : false)){
-            if(endOfGame = checkForMate(board, nOfMoves % 2 == 1? true : false)){       //SETS end of game
-                cout << "CHECKMATE";
+            if(checkForMate(board, nOfMoves % 2 == 1? true : false, move, castlingRights)){       
+                cout << "CHECKMATE \n";
                 break;
             }
         }
