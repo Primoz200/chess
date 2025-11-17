@@ -14,14 +14,12 @@ inline int getBitNr(int x, int y){
 }
 
 void setBit(uint64_t &piece, int bit){
-    piece |= (1LL << bit);
+    piece |= (1ULL << bit);
 }
 
 void resetBit(uint64_t &piece, int bit){
-    piece & ~(1L << bit);
+    piece &= ~(1ULL << bit);
 }
-
-
 
 void slide(vector<vector<int>> &board, int i, int j, int dirx, int diry){    
     int figura = board[i][j];
@@ -51,7 +49,7 @@ void slide(vector<vector<int>> &board, int i, int j, int dirx, int diry){
 
 pair<uint64_t, uint64_t>& attackBitBoards(vector<vector<int>> &board){        //a8=0bit h1=63bit
     allAttacks = {0, 0};
-    for(int i = 0; i < 14; i++){
+    for(int i = 0; i < pieces.size(); i++){
         pieces[i] = 0;
     }
     for(int8_t i = 0; i<8; i++){                                //checks for inside the board are performed by the getBitNr function
@@ -103,7 +101,7 @@ pair<uint64_t, uint64_t>& attackBitBoards(vector<vector<int>> &board){        //
                     };
                     for(auto m : possible){
                         int bit = getBitNr(j+m[0], i+m[1]);
-                        if(bit >= 0; bit <= 63){
+                        if(bit >= 0 && bit <= 63){
                             setBit(pieces[figura], bit);
                             setBit(attacks, bit);
                         }

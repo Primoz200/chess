@@ -104,7 +104,7 @@ void printBitboard(uint64_t a) {
     }
 }
 
-void string2Move(string moveS, Move* move) {
+void string2Move(string moveS, Move* move) { //TODO FIX
     move->fromX = moveS[0] - 'a';
     move->fromY = 7 - (moveS[1] - '1');
     move->toX = moveS[2] - 'a';
@@ -112,7 +112,7 @@ void string2Move(string moveS, Move* move) {
 }
 
 void updatePrevBoard(Move* move){
-    move->prev->prev == NULL;
+    move->prev->prev = NULL;
     move->prev->fromX = move->fromX;
     move->prev->fromY = move->fromY;
     move->prev->toX = move->toX;
@@ -145,6 +145,11 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
         return false;
     }
     return true;
+}
+
+void forceMove(vector<vector<int>> &board, Move move){                 //ONLY use on tempboards
+    board[move.toY][move.toX] = board[move.fromY][move.fromX];
+    board[move.fromY][move.fromX] = 0;
 }
 
 int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value is the index of the move + 1 to make enPassant checks easier while also being valid if index = 0
@@ -247,27 +252,6 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
     }
 }
 
-bool kings(vector<vector<int>> &board, Move &move, bool color, pair<bool, bool> &castlingRights){
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-
-    generateKingMoves(board, moves, move, castlingRights);
-    if(checkIfMoveInVector(move, moves)){
-        if(move.fromX-move.toX == 2) {
-            board[move.fromY][move.fromX-1] = board[move.fromY][move.fromX-4];
-            board[move.fromY][move.fromX-4] = 0;
-        }
-        if(move.toX-move.fromX == 2) {
-            board[move.fromY][move.fromX+1] = board[move.fromY][move.fromX+3];
-            board[move.fromY][move.fromX+3] = 0;
-        }        
-        color ? castlingRights.first = false : castlingRights.second = false;
-        return makeMove(board, move, color);
-    }
-
-    return false;
-}
-
 void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, bool color){
     if(color){
         if(board[move.fromY-1][move.fromX] == 0){
@@ -283,8 +267,8 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         if(board[move.fromY-1][move.fromX-1] >= 7){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL});
         }
-        if(move.prev->fromY == 1 && move.prev->toY == 3){
-            if(move.fromY == 3){
+        if(move.prev->fromY == 1 && move.prev->toY == 3 && board[move.prev->toY][move.prev->toY] == 7){
+            if(move.fromY == 3 && abs(move.fromX-move.prev->toX)==1){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
             }
         }
@@ -301,49 +285,14 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         if(board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL});
         }
-        if(move.prev->fromY == 6 && move.prev->toY == 4){
-            if(move.fromY == 4){
+        if(move.prev->fromY == 6 && move.prev->toY == 4 && board[move.prev->toY][move.prev->toY] == 1){
+            if(move.fromY == 4  && abs(move.fromX-move.prev->toX)==1){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL});
             }
         }
     }
 }
 
-bool pawns(vector<vector<int>> &board, Move &move, bool color){      //returns true if move is valid and moves piece if it is
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-
-    generatePawnMoves(board, moves, move, color);
-    int logicalValue = checkIfMoveInVector(move, moves);
-    if(logicalValue){
-        if(makeMove(board, move, color)){
-            if(move.toY == 7 || move.toY == 0){
-                board[move.toY][move.toX] = color ? 5 : 11;
-            }
-            if(logicalValue == moves.size()){
-                if(color) board[move.toY+1][move.toX] = 0;
-                else board[move.toY-1][move.toX] = 0;
-            }
-            return true;            
-        }
-    }
-    return false;
-}
-
-bool rooks(vector<vector<int>> &board, Move &move, bool color){
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, 1, 0);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, -1, 0);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, 0, 1);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, 0, -1);
-
-    if(checkIfMoveInVector(move, moves)){
-        return makeMove(board, move, color);
-    }
-
-    return false;
-}
 
 void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move &move){
     bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
@@ -368,57 +317,12 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
     
 }
 
-bool knights(vector<vector<int>> &board, Move &move, bool color){
-    if(!insideBoard(move)) return false;
-
-    vector<Move> moves;
-    generateKnightMoves(board, moves, move);
-
-    if(checkIfMoveInVector(move, moves)){
-        return makeMove(board, move, color);
-    }
-
-    return false;
-}
-
-bool bishops(vector<vector<int>> &board, Move &move, bool color) {
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, 1, 1);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, -1, -1);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, -1, 1);
-    generateSlidingMoves(board, moves, move.fromX, move.fromY, 1, -1);
-
-    if(checkIfMoveInVector(move, moves)){
-        return makeMove(board, move, color);
-    }
-
-    return false;
-
-}
-bool queens(vector<vector<int>> &board, Move &move, bool color) {
-    if(!insideBoard(move)) return false;
-    vector<Move> moves;
-
-    for(int i = -1; i <= 1; i++){
-        for(int j = -1; j <= 1; j++){
-            if(i==0 && j==0) continue;
-            generateSlidingMoves(board, moves, move.fromX, move.fromY, i, j);
-        }
-    }
-
-    if(checkIfMoveInVector(move, moves)){
-        return makeMove(board, move, color);
-    }
-
-    return false;
-}
-
 void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move lastMove, pair<bool, bool> &castlingRights){
     vector<vector<int>> tempBoard = board;
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
     moves.clear();
 
+    int nrGeneratedMoves = 0;
     for(int i = 0; i <= 7; i++){       
         for(int j = 0; j <= 7; j++){
             if(board[i][j] == 0) continue;
@@ -456,9 +360,53 @@ void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, 
                         }
                         break;
                 }
+
+                for(int a = nrGeneratedMoves; a < moves.size(); a++){
+                    if(!makeMove(tempBoard, moves[a], color)){
+                        moves[a].fromX = 0;
+                        moves[a].fromY = 0;
+                        moves[a].toX = 0;
+                        moves[a].toY = 0;
+                    }else{
+                        forceMove(tempBoard, moves[a].reverseMove());
+                    }
+                }
+                nrGeneratedMoves = moves.size();
             }
         }
     }
+}
+
+void kings(vector<vector<int>> &board, Move &move, pair<bool, bool> &castlingRights){
+    bool color = board[move.fromY][move.fromX]==6 ? true : false;
+
+    if(move.fromX-move.toX == 2) {
+        board[move.fromY][move.fromX-1] = board[move.fromY][move.fromX-4];
+        board[move.fromY][move.fromX-4] = 0;
+    }
+    if(move.toX-move.fromX == 2) {
+        board[move.fromY][move.fromX+1] = board[move.fromY][move.fromX+3];
+        board[move.fromY][move.fromX+3] = 0;
+    }        
+    color ? castlingRights.first = false : castlingRights.second = false;
+    makeMove(board, move, color);
+}
+
+void pawns(vector<vector<int>> &board, Move move, bool color){
+    if(color && move.prev->fromY==1 && move.prev->toY==3){
+        if(move.toX == move.prev->toX && move.toY == 2 ){
+            board[move.toY+1][move.toX] = 0;
+        }
+    }
+    if(!color && move.prev->fromY==6 && move.prev->toY==4){
+        if(move.toX == move.prev->toX && move.toY == 5){
+            board[move.toY-1][move.toX] = 0;
+        }
+    }
+    if(move.toY == 0 || move.toY == 7){
+        board[move.toY][move.toX] = color ? 5 : 11;
+    }
+    makeMove(board, move, color);
 }
 
 bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
@@ -467,22 +415,16 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
     bool valid = false;
     switch (figura % 6) {
         case 0:
-            kings(board, move, color, castlingRights);
+            kings(board, move, castlingRights);
             break;
         case 1:
-            valid = pawns(board, move, color);
+            pawns(board, move, color);
             break;
-        case 2:
-            valid = rooks(board, move, color);
-            break;
+        case 2:                         //knights bishops rooks and queens dont have special moves that have to be handled seperatly
         case 3:
-            valid = knights(board, move, color);
-            break;
         case 4:
-            valid = bishops(board, move, color);
-            break;
         case 5:
-            valid = queens(board, move, color);
+            makeMove(board, move, color);
             break;
     }
 
@@ -505,6 +447,7 @@ int main() {
     pair<bool, bool> castlingRights = {true, true};
 
     while(!endOfGame) {
+        move.toString();
         printBoard(board);
         generateMoves(board, nOfMoves % 2 == 1? true : false, moves, move, castlingRights);
 
@@ -528,6 +471,7 @@ int main() {
 
 
         cin >> strMove;
+        if(strMove == "q") break;
         updatePrevBoard(&move);
         string2Move(strMove, &move);
         while(!insideBoard(move) || !checkIfMoveInVector(move, moves)){
@@ -540,6 +484,8 @@ int main() {
                 cout << "Black to move: \n";
             }
             cin >> strMove;
+        if(strMove == "q") break;
+
             string2Move(strMove, &move);
         }
         
