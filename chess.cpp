@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include "bitBoards.h"
 
+#define USER_V_USER 1;
+#define USER_V_BOT 2;
+#define BOT_V_BOT 3;
 
 using namespace std;
 
@@ -431,6 +434,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
     return valid;
 }
 
+
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
 
@@ -445,14 +449,17 @@ int main() {
     Move prMove(0, 0, 0, 0, NULL);
     Move move(0, 0, 0, 0, &prMove);  
     pair<bool, bool> castlingRights = {true, true};
+    int typeOfGame = 1;
 
     while(!endOfGame) {
+        bool color = nOfMoves % 2 == 1? true : false;
+
         move.toString();
         printBoard(board);
-        generateMoves(board, nOfMoves % 2 == 1? true : false, moves, move, castlingRights);
+        generateMoves(board, color, moves, move, castlingRights);
 
         if(moves.empty()){
-            if(kingInCheck(board, move, nOfMoves % 2 == 1? true : false)){
+            if(kingInCheck(board, move, color)){
                 cout << "CHECKMATE\n";
                 break;
             }
@@ -489,7 +496,7 @@ int main() {
             string2Move(strMove, &move);
         }
         
-        evalCurMove(board, move, nOfMoves % 2 == 1? true : false, castlingRights);
+        evalCurMove(board, move, color, castlingRights);
         nOfMoves++;
     }
 }
