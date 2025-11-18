@@ -5,6 +5,8 @@
 #include <array>
 #include <stdint.h>
 #include "bitBoards.h"
+#include "Move.h"
+#include "bot.h"
 
 #define USER_V_USER 1;
 #define USER_V_BOT 2;
@@ -48,40 +50,6 @@ void setUpBoard(vector<vector<int>>  &v) {
 
 }
 
-class Move {
-    public:
-        int fromX;
-        int fromY;
-        int toX;
-        int toY;
-        Move* prev;
-
-        Move(int x1, int y1, int x2, int y2, Move* pr) {
-            fromX = x1;
-            fromY = y1;
-            toX = x2;
-            toY = y2;
-            prev = pr;
-        }
-
-        void toString(){
-            cout << "--" << fromX << " " << fromY  << " " << toX << " " << toY << endl;
-            if(prev != NULL){
-                cout << prev->fromX << " " << prev->fromY << " " << prev->toX << " " << prev->toY << endl;
-            }
-        }
-
-        bool equals(Move &move){
-            return fromX == move.fromX && fromY == move.fromY &&
-                   toX == move.toX && toY == move.toY;
-        }
-
-        Move reverseMove(){
-            return {toX, toY, fromX, fromY, NULL};
-        }
-
-};
-
 void printBoard(vector<vector<int>> &v) {
     cout << "   ";
     for (int k = 0; k < 8; k++) {
@@ -105,21 +73,6 @@ void printBitboard(uint64_t a) {
         if( i % 8 ==  0) cout << "\n";
         cout << ((a>>i) & 1L) << " ";
     }
-}
-
-void string2Move(string moveS, Move* move) { //TODO FIX
-    move->fromX = moveS[0] - 'a';
-    move->fromY = 7 - (moveS[1] - '1');
-    move->toX = moveS[2] - 'a';
-    move->toY = 7 - (moveS[3] - '1');
-}
-
-void updatePrevBoard(Move* move){
-    move->prev->prev = NULL;
-    move->prev->fromX = move->fromX;
-    move->prev->fromY = move->fromY;
-    move->prev->toX = move->toX;
-    move->prev->toY = move->toY;
 }
 
 bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){ //retruns true if king of color is in check
@@ -434,6 +387,20 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
     return valid;
 }
 
+void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool color){
+    if(typeOfGame == 1){
+        cin >> strMove;
+    }else if(typeOfGame == 2){
+        if(color){
+            cin >> strMove;
+        }else{
+            strMove = getBotMove(board, moves);
+        }
+    }
+    else if(typeOfGame == 3){
+        strMove = getBotMove(board, moves);
+    }
+}
 
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
@@ -443,18 +410,16 @@ int main() {
     setUpBoard(board);
 
     vector<Move> moves;
-    bool endOfGame = false;
     int nOfMoves = 1;
     string strMove = "";
     Move prMove(0, 0, 0, 0, NULL);
     Move move(0, 0, 0, 0, &prMove);  
     pair<bool, bool> castlingRights = {true, true};
-    int typeOfGame = 1;
+    int typeOfGame = USER_V_USER;
 
-    while(!endOfGame) {
+    while(1) {
         bool color = nOfMoves % 2 == 1? true : false;
 
-        move.toString();
         printBoard(board);
         generateMoves(board, color, moves, move, castlingRights);
 
@@ -477,12 +442,11 @@ int main() {
         }
 
 
-        cin >> strMove;
+        getMove(strMove, board, moves, typeOfGame, color);
         if(strMove == "q") break;
-        updatePrevBoard(&move);
-        string2Move(strMove, &move);
+        move.updatePrevBoard();
+        move.string2move(strMove);
         while(!insideBoard(move) || !checkIfMoveInVector(move, moves)){
-
             cout << "invalid move. "; 
             if(nOfMoves % 2 == 1) {
                 cout << "White to move: \n";
@@ -490,10 +454,9 @@ int main() {
             else{
                 cout << "Black to move: \n";
             }
-            cin >> strMove;
-        if(strMove == "q") break;
-
-            string2Move(strMove, &move);
+            getMove(strMove, board, moves, typeOfGame, color);
+            if(strMove == "q") break;
+            move.string2move(strMove);
         }
         
         evalCurMove(board, move, color, castlingRights);
