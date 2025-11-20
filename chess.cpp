@@ -8,11 +8,15 @@
 #include "Move.h"
 #include "bot.h"
 
-#define USER_V_USER 1;
-#define USER_V_BOT 2;
-#define BOT_V_BOT 3;
-
 using namespace std;
+
+#define USER_V_USER 1
+#define USER_V_BOT 2
+#define BOT_V_BOT 3
+#define IN_GAME 1
+#define WHITE_WIN 2
+#define BLACK_WIN 3
+#define STALEMATE 4
 
 map<int, string> figure = {
     {0, "-"},
@@ -75,7 +79,7 @@ void printBitboard(uint64_t a) {
     }
 }
 
-bool kingInCheck(vector<vector<int>> &board, Move &move, bool color){ //retruns true if king of color is in check
+bool kingInCheck(vector<vector<int>> &board, bool color){ //retruns true if king of color is in check
     int targetNr = color ? 6 : 12;
     uint64_t kingPos = 0;
 
@@ -95,7 +99,7 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = 0;
 
-   if(kingInCheck(board, move, color)) {
+   if(kingInCheck(board, color)) {
         board[move.fromY][move.fromX] = board[move.toY][move.toX];
         board[move.toY][move.toX] = 0;
         return false;
@@ -113,6 +117,14 @@ int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value i
         if(move.equals(moves[i])) return i+1;
     }
     return 0;
+}
+
+bool allMovesNull(vector<Move> &moves){
+    for(Move move : moves){
+        if(!move.isNull()) return false;
+    }
+
+    return true;
 }
 
 bool insideBoard(Move &move) {                              //checks that its inside the board and that it does move
@@ -160,7 +172,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
             if(tempBoard[move.fromY+y][move.fromX+x] == 0){
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
                 tempBoard[move.fromY][move.fromX] = 0;
-                if(!kingInCheck(tempBoard, move, color)){
+                if(!kingInCheck(tempBoard, color)){
                     moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
                 }
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
@@ -172,7 +184,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         }
             tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
             tempBoard[move.fromY][move.fromX] = 0;
-            if(!kingInCheck(tempBoard, move, color)){
+            if(!kingInCheck(tempBoard, color)){
                 moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
             }
             tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
@@ -183,12 +195,12 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
     int rookNr = color ? 2 : 8;
     int kingNr = color ? 6 : 12;
     int rank = color ? 7 : 0;
-    if(((color && castlingRights.first) || (!color && castlingRights.second)) && !kingInCheck(board, move, color)){
+    if(((color && castlingRights.first) || (!color && castlingRights.second)) && !kingInCheck(board, color)){
         if(move.fromX == 4 && move.fromY == rank){
             if(tempBoard[move.fromY][move.fromX+1] == 0 && tempBoard[move.fromY][move.fromX+2] == 0 && tempBoard[move.fromY][move.fromX+3] == rookNr){
                 tempBoard[move.fromY][move.fromX+1] = kingNr;
                 tempBoard[move.fromY][move.fromX] = 0;
-                if(!kingInCheck(tempBoard, move, color)){
+                if(!kingInCheck(tempBoard, color)){
                     moves.push_back({move.fromX, move.fromY, move.fromX+2, move.fromY, NULL});
                 }
                 tempBoard[move.fromY][move.fromX+1] = 0;
@@ -198,7 +210,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
             if(tempBoard[move.fromY][move.fromX-1] == 0 && tempBoard[move.fromY][move.fromX-2] == 0 && tempBoard[move.fromY][move.fromX-3] == 0 && tempBoard[move.fromY][move.fromX-4] == rookNr){
                 tempBoard[move.fromY][move.fromX-1] = kingNr;
                 tempBoard[move.fromY][move.fromX] = 0;
-                if(!kingInCheck(tempBoard, move, color)){
+                if(!kingInCheck(tempBoard, color)){
                     moves.push_back({move.fromX, move.fromY, move.fromX-2, move.fromY, NULL});
                 }
                 tempBoard[move.fromY][move.fromX-1] = 0;
@@ -270,7 +282,6 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
             }
         }
     }
-    
 }
 
 void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move lastMove, pair<bool, bool> &castlingRights){
@@ -388,20 +399,75 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
 }
 
 void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool color){
-    if(typeOfGame == 1){
+    if(typeOfGame == USER_V_USER){
         cin >> strMove;
-    }else if(typeOfGame == 2){
+    }else if(typeOfGame == USER_V_BOT){
         if(color){
             cin >> strMove;
         }else{
             strMove = getBotMove(board, moves);
         }
     }
-    else if(typeOfGame == 3){
+    else if(typeOfGame == BOT_V_BOT){
         strMove = getBotMove(board, moves);
     }
 }
 
+int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, bool> &castlingRights ) {
+    int gameState = IN_GAME;
+    string moveString;
+    vector<Move> moves;
+    Move nullMove = {0, 0, 0, 0, NULL};
+    Move curMove = {0, 0, 0, 0, &nullMove};
+
+    while(gameState == IN_GAME){
+        printBoard(board);
+        generateMoves(board, color, moves, nullMove, castlingRights);
+
+        if(allMovesNull(moves)){
+            if(kingInCheck(board, color)){
+                gameState = color ? BLACK_WIN : WHITE_WIN;
+            }else {
+                gameState = STALEMATE;
+            }
+            break;
+        }
+        for(auto i : moves){
+            cout << i.toString() << " ";
+        }
+        if(color){ cout << "White to move:\n";}
+        else { cout << "Black to move:\n";}
+
+        curMove.updatePrevMove();
+        getMove(moveString, board, moves, typeOfGame, color);
+        curMove.string2move(moveString);
+        while(!checkIfMoveInVector(curMove, moves)){
+            if(moveString == "q") {gameState == STALEMATE; break;}
+
+            cout << "invalid Move\n";
+            if(color){ cout << "White to move:\n";}
+            else { cout << "Black to move:\n";}
+
+            getMove(moveString, board, moves, typeOfGame, color);
+            curMove.string2move(moveString);
+        }
+
+        evalCurMove(board, curMove, color, castlingRights);
+        color = !color;
+    }
+
+    return gameState;
+}
+
+void postGameOutput(int endState){
+    if(endState == STALEMATE){
+        cout << "STALEMATE\n";
+    }else if(endState == WHITE_WIN){
+        cout << "WHITE WINS\n";
+    }else if(endState == BLACK_WIN){
+        cout << "BLACK WINS\n";
+    }
+}
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
 
@@ -415,51 +481,11 @@ int main() {
     Move prMove(0, 0, 0, 0, NULL);
     Move move(0, 0, 0, 0, &prMove);  
     pair<bool, bool> castlingRights = {true, true};
-    int typeOfGame = USER_V_USER;
 
-    while(1) {
-        bool color = nOfMoves % 2 == 1? true : false;
+    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
 
-        printBoard(board);
-        generateMoves(board, color, moves, move, castlingRights);
-
-        if(moves.empty()){
-            if(kingInCheck(board, move, color)){
-                cout << "CHECKMATE\n";
-                break;
-            }
-            else{
-                cout << "STALEMATE";
-                break;
-            }
-        }
-        
-        if(nOfMoves % 2 == 1) {
-            cout << "White to move: \n";
-        }
-        else{
-            cout << "Black to move: \n";
-        }
+    castlingRights = {true, true};
+    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
 
 
-        getMove(strMove, board, moves, typeOfGame, color);
-        if(strMove == "q") break;
-        move.updatePrevBoard();
-        move.string2move(strMove);
-        while(!insideBoard(move) || !checkIfMoveInVector(move, moves)){
-            cout << "invalid move. "; 
-            if(nOfMoves % 2 == 1) {
-                cout << "White to move: \n";
-            }
-            else{
-                cout << "Black to move: \n";
-            }
-            getMove(strMove, board, moves, typeOfGame, color);
-            if(strMove == "q") break;
-            move.string2move(strMove);
-        }
-        
-        evalCurMove(board, move, color, castlingRights);
-        nOfMoves++;
-    }
 }

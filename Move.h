@@ -20,25 +20,25 @@ class Move {
             prev = pr;
         }
 
-        // string toString() {        //for debugging
-        //     string result;
+        string toString() {        //for debugging
+            string result;
 
-        //     result += "--" + to_string(fromX) + " " +
-        //             to_string(fromY) + " " +
-        //             to_string(toX)   + " " +
-        //             to_string(toY)   + "\n";
+            result += "--" + to_string(fromX) + " " +
+                    to_string(fromY) + " " +
+                    to_string(toX)   + " " +
+                    to_string(toY)   + "\n";
 
-        //     if (prev != nullptr) {
-        //         result += to_string(prev->fromX) + " " +
-        //                 to_string(prev->fromY) + " " +
-        //                 to_string(prev->toX)   + " " +
-        //                 to_string(prev->toY)   + "\n";
-        //     }
+            if (prev != nullptr) {
+                result += to_string(prev->fromX) + " " +
+                        to_string(prev->fromY) + " " +
+                        to_string(prev->toX)   + " " +
+                        to_string(prev->toY)   + "\n";
+            }
 
-        //     return result;
-        // }
+            return result;
+        }
 
-        void updatePrevBoard(){
+        void updatePrevMove(){
             prev->prev = NULL;
             prev->fromX = fromX;
             prev->fromY = fromY;
@@ -74,6 +74,10 @@ class Move {
         bool equals(Move &move){
             return fromX == move.fromX && fromY == move.fromY &&
                    toX == move.toX && toY == move.toY;
+        }
+
+        bool isNull(){
+            return fromX == 0 && fromY == 0 && toX == 0 && toY == 0;
         }
 
         Move reverseMove(){
