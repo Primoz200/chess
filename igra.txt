@@ -1,0 +1,635 @@
+   A B C D E F G H
+8: r n b q k b n r
+7: p p p p p p p p
+6: - - - - - - - -
+5: - - - - - - - -
+4: - - - - - - - -
+3: - - - - - - - -
+2: P P P P P P P P
+1: R N B Q K B N R
+   A B C D E F G H
+White to move:
+zzzzzzzzzz
+invalid Move
+White to move:
+d2d4
+   A B C D E F G H
+8: r n b q k b n r
+7: p p p p p p p p
+6: - - - - - - - -
+5: - - - - - - - -
+4: - - - P - - - -
+3: - - - - - - - -
+2: P P P - P P P P
+1: R N B Q K B N R
+   A B C D E F G H
+Black to move:
+d7d5
+   A B C D E F G H
+8: r n b q k b n r
+7: p p p - p p p p
+6: - - - - - - - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - - - - - - -
+2: P P P - P P P P
+1: R N B Q K B N R
+   A B C D E F G H
+White to move:
+n1c3
+invalid Move
+White to move:
+b1c3
+   A B C D E F G H
+8: r n b q k b n r
+7: p p p - p p p p
+6: - - - - - - - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - N - - - - -
+2: P P P - P P P P
+1: R - B Q K B N R
+   A B C D E F G H
+Black to move:
+g8f6
+   A B C D E F G H
+8: r n b q k b - r
+7: p p p - p p p p
+6: - - - - - n - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - N - - - - -
+2: P P P - P P P P
+1: R - B Q K B N R
+   A B C D E F G H
+White to move:
+e2e3
+   A B C D E F G H
+8: r n b q k b - r
+7: p p p - p p p p
+6: - - - - - n - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - N - P - - -
+2: P P P - - P P P
+1: R - B Q K B N R
+   A B C D E F G H
+Black to move:
+c8f5
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - p p p p
+6: - - - - - n - -
+5: - - - p - b - -
+4: - - - P - - - -
+3: - - N - P - - -
+2: P P P - - P P P
+1: R - B Q K B N R
+   A B C D E F G H
+White to move:
+g1f3
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - p p p p
+6: - - - - - n - -
+5: - - - p - b - -
+4: - - - P - - - -
+3: - - N - P N - -
+2: P P P - - P P P
+1: R - B Q K B - R
+   A B C D E F G H
+Black to move:
+e7e6
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - b - -
+4: - - - P - - - -
+3: - - N - P N - -
+2: P P P - - P P P
+1: R - B Q K B - R
+   A B C D E F G H
+White to move:
+b1d3
+invalid Move
+White to move:
+f1d3
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - b - -
+4: - - - P - - - -
+3: - - N B P N - -
+2: P P P - - P P P
+1: R - B Q K - - R
+   A B C D E F G H
+Black to move:
+f6d3
+invalid Move
+Black to move:
+f5d3
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - N b P N - -
+2: P P P - - P P P
+1: R - B Q K - - R
+   A B C D E F G H
+White to move:
+c2d3
+   A B C D E F G H
+8: r n - q k b - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - - - P - - - -
+3: - - N P P N - -
+2: P P - - - P P P
+1: R - B Q K - - R
+   A B C D E F G H
+Black to move:
+f8b4
+   A B C D E F G H
+8: r n - q k - - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - b - P - - - -
+3: - - N P P N - -
+2: P P - - - P P P
+1: R - B Q K - - R
+   A B C D E F G H
+White to move:
+e1g1
+   A B C D E F G H
+8: r n - q k - - r
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - b - P - - - -
+3: - - N P P N - -
+2: P P - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+Black to move:
+e8g8
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - b - P - - - -
+3: - - N P P N - -
+2: P P - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+White to move:
+e3e4
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - b - P P - - -
+3: - - N P - N - -
+2: P P - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+Black to move:
+b4c3
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - - - P P - - -
+3: - - b P - N - -
+2: P P - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+White to move:
+b2c3
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - p - - - -
+4: - - - P P - - -
+3: - - P P - N - -
+2: P - - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+Black to move:
+d5e4
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - - - - - -
+4: - - - P p - - -
+3: - - P P - N - -
+2: P - - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+White to move:
+d3e4
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p n - -
+5: - - - - - - - -
+4: - - - P P - - -
+3: - - P - - N - -
+2: P - - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+Black to move:
+f6e4
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - - -
+4: - - - P n - - -
+3: - - P - - N - -
+2: P - - - - P P P
+1: R - B Q - R K -
+   A B C D E F G H
+White to move:
+c1g5
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - B -
+4: - - - P n - - -
+3: - - P - - N - -
+2: P - - - - P P P
+1: R - - Q - R K -
+   A B C D E F G H
+Black to move:
+e4g5
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - n -
+4: - - - P - - - -
+3: - - P - - N - -
+2: P - - - - P P P
+1: R - - Q - R K -
+   A B C D E F G H
+White to move:
+f3g5
+   A B C D E F G H
+8: r n - q - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - N -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: R - - Q - R K -
+   A B C D E F G H
+Black to move:
+d8g5
+   A B C D E F G H
+8: r n - - - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: R - - Q - R K -
+   A B C D E F G H
+White to move:
+a1b1
+   A B C D E F G H
+8: r n - - - r k -
+7: p p p - - p p p
+6: - - - - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: - R - Q - R K -
+   A B C D E F G H
+Black to move:
+b8c6
+   A B C D E F G H
+8: r - - - - r k -
+7: p p p - - p p p
+6: - - n - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: - R - Q - R K -
+   A B C D E F G H
+White to move:
+b1b7
+   A B C D E F G H
+8: r - - - - r k -
+7: p R p - - p p p
+6: - - n - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: - - - Q - R K -
+   A B C D E F G H
+Black to move:
+a8c8
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - - p p p
+6: - - n - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - - -
+2: P - - - - P P P
+1: - - - Q - R K -
+   A B C D E F G H
+White to move:
+g2g3
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - - p p p
+6: - - n - p - - -
+5: - - - - - - q -
+4: - - - P - - - -
+3: - - P - - - P -
+2: P - - - - P - P
+1: - - - Q - R K -
+   A B C D E F G H
+Black to move:
+f7f5
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - - - p p
+6: - - n - p - - -
+5: - - - - - p q -
+4: - - - P - - - -
+3: - - P - - - P -
+2: P - - - - P - P
+1: - - - Q - R K -
+   A B C D E F G H
+White to move:
+f2f4
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - - - p p
+6: - - n - p - - -
+5: - - - - - p q -
+4: - - - P - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - R K -
+   A B C D E F G H
+Black to move:
+g5e7
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - q - p p
+6: - - n - p - - -
+5: - - - - - p - -
+4: - - - P - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - R K -
+   A B C D E F G H
+White to move:
+f1e1
+   A B C D E F G H
+8: - - r - - r k -
+7: p R p - q - p p
+6: - - n - p - - -
+5: - - - - - p - -
+4: - - - P - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+Black to move:
+f8e8
+   A B C D E F G H
+8: - - r - r - k -
+7: p R p - q - p p
+6: - - n - p - - -
+5: - - - - - p - -
+4: - - - P - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+White to move:
+d4d5
+   A B C D E F G H
+8: - - r - r - k -
+7: p R p - q - p p
+6: - - n - p - - -
+5: - - - P - p - -
+4: - - - - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+Black to move:
+c6a5
+   A B C D E F G H
+8: - - r - r - k -
+7: p R p - q - p p
+6: - - - - p - - -
+5: n - - P - p - -
+4: - - - - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+White to move:
+b7a7
+   A B C D E F G H
+8: - - r - r - k -
+7: R - p - q - p p
+6: - - - - p - - -
+5: n - - P - p - -
+4: - - - - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+Black to move:
+a5c4
+   A B C D E F G H
+8: - - r - r - k -
+7: R - p - q - p p
+6: - - - - p - - -
+5: - - - P - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q R - K -
+   A B C D E F G H
+White to move:
+e1e6
+   A B C D E F G H
+8: - - r - r - k -
+7: R - p - q - p p
+6: - - - - R - - -
+5: - - - P - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - - K -
+   A B C D E F G H
+Black to move:
+e7c5
+   A B C D E F G H
+8: - - r - r - k -
+7: R - p - - - p p
+6: - - - - R - - -
+5: - - q P - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - - K -
+   A B C D E F G H
+White to move:
+g1f2
+invalid Move
+White to move:
+e6e8
+invalid Move
+White to move:
+g1g1
+invalid Move
+White to move:
+g1f1
+   A B C D E F G H
+8: - - r - r - k -
+7: R - p - - - p p
+6: - - - - R - - -
+5: - - q P - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - K - -
+   A B C D E F G H
+Black to move:
+e8e6
+   A B C D E F G H
+8: - - r - - - k -
+7: R - p - - - p p
+6: - - - - r - - -
+5: - - q P - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - K - -
+   A B C D E F G H
+White to move:
+d5e6
+   A B C D E F G H
+8: - - r - - - k -
+7: R - p - - - p p
+6: - - - - P - - -
+5: - - q - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - K - -
+   A B C D E F G H
+Black to move:
+c5a7
+   A B C D E F G H
+8: - - r - - - k -
+7: q - p - - - p p
+6: - - - - P - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - Q - K - -
+   A B C D E F G H
+White to move:
+d1d7
+   A B C D E F G H
+8: - - r - - - k -
+7: q - p Q - - p p
+6: - - - - P - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+Black to move:
+a7a6
+   A B C D E F G H
+8: - - r - - - k -
+7: - - p Q - - p p
+6: q - - - P - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+White to move:
+d7f7
+   A B C D E F G H
+8: - - r - - - k -
+7: - - p - - Q p p
+6: q - - - P - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+Black to move:
+g8h8
+   A B C D E F G H
+8: - - r - - - - k
+7: - - p - - Q p p
+6: q - - - P - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+White to move:
+e6e7
+   A B C D E F G H
+8: - - r - - - - k
+7: - - p - P Q p p
+6: q - - - - - - -
+5: - - - - - p - -
+4: - - n - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+Black to move:
+c4e5
+   A B C D E F G H
+8: - - r - - - - k
+7: - - p - P Q p p
+6: q - - - - - - -
+5: - - - - n p - -
+4: - - - - - P - -
+3: - - P - - - P -
+2: P - - - - - - P
+1: - - - - - K - -
+   A B C D E F G H
+Segmentation fault (core dumped)
+
+
+

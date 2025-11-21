@@ -53,13 +53,13 @@ map<char, int> reverseFigure = {
 
 void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR") {
     int nextSquare = 0;
-    for(char a : fen){
+    for(char a : fen){          //2r4k/2p1PQpp/q7/4p2/2n2P2/2P3P1/P6P/5K2
         if(a == '/') continue;  
         if(isdigit(a)){
             for(int i = 0; i < a - '0'; i++){
                 v[nextSquare/8][nextSquare%8] = 0;
+                nextSquare++;
             }
-            nextSquare += a - '0';
         }else{
             v[nextSquare/8][nextSquare%8] = reverseFigure[a];
             nextSquare++;
@@ -73,15 +73,23 @@ void printBoard(vector<vector<int>> &v) {
         cout << string(1, 'A' + k);
         cout << " "; 
     }
-    cout << endl;
+    cout << "\n";
     for (int i = 0; i < v.size(); i++) {
         cout << (8-i) << ": ";
         for (int j = 0; j < v[i].size(); j++) {
             cout << figure[v[i][j]] << " ";
             // if (v[i][j] < 10) { cout << " "; }
         }
-    cout << endl;
+    cout << "\n";
     }
+    cout << "   ";
+    for (int k = 0; k < 8; k++) {
+        cout << string(1, 'A' + k);
+        cout << " "; 
+    }
+    cout << "\n";
+
+    cout << "danda";
 }
 
 void printBitboard(uint64_t a) {
@@ -434,8 +442,11 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, b
     Move curMove = {0, 0, 0, 0, &nullMove};
 
     while(gameState == IN_GAME){
+        cout << "\033[2J\033[1;1H";
         printBoard(board);
+        cout << "neki";
         generateMoves(board, color, moves, nullMove, castlingRights);
+        cout << "n";
 
         if(allMovesNull(moves)){
             if(kingInCheck(board, color)){
@@ -484,10 +495,10 @@ void postGameOutput(int endState){
 
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
-    setUpBoard(board);
+    setUpBoard(board, "2r4k/2p1PQpp/q7/5p2/2n2P2/2P3P1/P6P/5K2");
 
     pair<bool, bool> castlingRights = {true, true};
 
-    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
+    postGameOutput(gameLoop(board, USER_V_USER, false, castlingRights));
 
 }
