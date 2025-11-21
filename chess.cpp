@@ -20,38 +20,51 @@ using namespace std;
 
 map<int, string> figure = {
     {0, "-"},
-    {1, "p"},
-    {2, "r"},
-    {3, "n"},
-    {4, "b"},
-    {5, "q"},
-    {6, "k"},
-    {7, "P"},
-    {8, "R"},
-    {9, "N"},
-    {10, "B"},
-    {11, "Q"},
-    {12, "K"}};
+    {1, "P"},
+    {2, "R"},
+    {3, "N"},
+    {4, "B"},
+    {5, "Q"},
+    {6, "K"},
+    {7, "p"},
+    {8, "r"},
+    {9, "n"},
+    {10, "b"},
+    {11, "q"},
+    {12, "k"}
+};
 
-void setUpBoard(vector<vector<int>>  &v) {
-    for(int i = 0; i < 3; i++){
-        v[0][i] = 8+i;
-        v[0][7-i] = 8+i;
+map<char, int> reverseFigure = {
+    {'-', 0},
+    {'P', 1},
+    {'R', 2},
+    {'N', 3},
+    {'B', 4},
+    {'Q', 5},
+    {'K', 6},
+    {'p', 7},
+    {'r', 8},
+    {'n', 9},
+    {'b', 10},
+    {'q', 11},
+    {'k', 12}
+};
 
-        v[7][i] = 2+i;
-        v[7][7-i] = 2+i;
+
+void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR") {
+    int nextSquare = 0;
+    for(char a : fen){
+        if(a == '/') continue;  
+        if(isdigit(a)){
+            for(int i = 0; i < a - '0'; i++){
+                v[nextSquare/8][nextSquare%8] = 0;
+            }
+            nextSquare += a - '0';
+        }else{
+            v[nextSquare/8][nextSquare%8] = reverseFigure[a];
+            nextSquare++;
+        }
     }
-    v[0][3] = 11;
-    v[0][4] = 12;
-    v[7][3] = 5;
-    v[7][4] = 6;
-
-    for(int i = 0; i < 8; i++){
-        v[1][i] = 7;
-        v[6][i] = 1;
-    }
-
-
 }
 
 void printBoard(vector<vector<int>> &v) {
@@ -432,9 +445,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, b
             }
             break;
         }
-        for(auto i : moves){
-            cout << i.toString() << " ";
-        }
+        
         if(color){ cout << "White to move:\n";}
         else { cout << "Black to move:\n";}
 
@@ -475,17 +486,8 @@ int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
 
-    vector<Move> moves;
-    int nOfMoves = 1;
-    string strMove = "";
-    Move prMove(0, 0, 0, 0, NULL);
-    Move move(0, 0, 0, 0, &prMove);  
     pair<bool, bool> castlingRights = {true, true};
 
     postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
-
-    castlingRights = {true, true};
-    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
-
 
 }
