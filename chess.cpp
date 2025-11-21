@@ -88,8 +88,6 @@ void printBoard(vector<vector<int>> &v) {
         cout << " "; 
     }
     cout << "\n";
-
-    cout << "danda";
 }
 
 void printBitboard(uint64_t a) {
@@ -246,14 +244,15 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         if(board[move.fromY-1][move.fromX] == 0){
             
             moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-1, NULL});
-            if(board[move.fromY-2][move.fromX] == 0 && move.fromY == 6){
+
+            if(move.fromY-2 >= 0 && board[move.fromY-2][move.fromX] == 0 && move.fromY == 6){
                 moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-2, NULL});
             }
         }
-        if(board[move.fromY-1][move.fromX+1] >= 7){
+        if(move.fromX+1 < 8 && board[move.fromY-1][move.fromX+1] >= 7){
             moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY-1, NULL});
         }
-        if(board[move.fromY-1][move.fromX-1] >= 7){
+        if(move.fromX-1 >= 0 && board[move.fromY-1][move.fromX-1] >= 7){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL});
         }
         if(move.prev->fromY == 1 && move.prev->toY == 3 && board[move.prev->toY][move.prev->toY] == 7){
@@ -261,17 +260,18 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
             }
         }
-    }else {
+    }else { 
         if(board[move.fromY+1][move.fromX] == 0){
             moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+1, NULL});
-            if(board[move.fromY+2][move.fromX] == 0 && move.fromY == 1){
+
+            if(move.fromY+2 < 8 && board[move.fromY+2][move.fromX] == 0 && move.fromY == 1){
                 moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+2, NULL});
             }
         }
-        if(board[move.fromY+1][move.fromX+1] <= 6 && board[move.fromY+1][move.fromX+1] != 0){
+        if(move.fromX+1 < 8 && board[move.fromY+1][move.fromX+1] <= 6 && board[move.fromY+1][move.fromX+1] != 0){
             moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY+1, NULL});
         }
-        if(board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
+        if(move.fromX-1 >= 0 && board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL});
         }
         if(move.prev->fromY == 6 && move.prev->toY == 4 && board[move.prev->toY][move.prev->toY] == 1){
@@ -305,7 +305,7 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
     }
 }
 
-void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move lastMove, pair<bool, bool> &castlingRights){
+void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move &lastMove, pair<bool, bool> &castlingRights){
     vector<vector<int>> tempBoard = board;
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
     moves.clear();
@@ -421,6 +421,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
 
 void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool color){
     if(typeOfGame == USER_V_USER){
+        strMove = "";
         cin >> strMove;
     }else if(typeOfGame == USER_V_BOT){
         if(color){
@@ -444,9 +445,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, b
     while(gameState == IN_GAME){
         cout << "\033[2J\033[1;1H";
         printBoard(board);
-        cout << "neki";
-        generateMoves(board, color, moves, nullMove, castlingRights);
-        cout << "n";
+        generateMoves(board, color, moves, curMove, castlingRights);
 
         if(allMovesNull(moves)){
             if(kingInCheck(board, color)){
@@ -464,7 +463,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, b
         getMove(moveString, board, moves, typeOfGame, color);
         curMove.string2move(moveString);
         while(!checkIfMoveInVector(curMove, moves)){
-            if(moveString == "q") {gameState == STALEMATE; break;}
+            if(moveString == "q") {gameState = STALEMATE; break;}
 
             cout << "invalid Move\n";
             if(color){ cout << "White to move:\n";}
