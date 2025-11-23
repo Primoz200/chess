@@ -126,9 +126,9 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool color) {
     return true;
 }
 
-void forceMove(vector<vector<int>> &board, Move move){                 //ONLY use on tempboards
+void forceMove(vector<vector<int>> &board, Move move, int oldPiece=0){                 //ONLY use on tempboards
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
-    board[move.fromY][move.fromX] = 0;
+    board[move.fromY][move.fromX] = oldPiece;
 }
 
 int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value is the index of the move + 1 to make enPassant checks easier while also being valid if index = 0
@@ -255,7 +255,7 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         if(move.fromX-1 >= 0 && board[move.fromY-1][move.fromX-1] >= 7){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL});
         }
-        if(move.prev->fromY == 1 && move.prev->toY == 3 && board[move.prev->toY][move.prev->toY] == 7){
+        if(move.prev->fromY == 1 && move.prev->toY == 3 && board[move.prev->toY][move.prev->toX] == 7){
             if(move.fromY == 3 && abs(move.fromX-move.prev->toX)==1){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
             }
@@ -274,7 +274,7 @@ void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
         if(move.fromX-1 >= 0 && board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
             moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL});
         }
-        if(move.prev->fromY == 6 && move.prev->toY == 4 && board[move.prev->toY][move.prev->toY] == 1){
+        if(move.prev->fromY == 6 && move.prev->toY == 4 && board[move.prev->toY][move.prev->toX] == 1){
             if(move.fromY == 4  && abs(move.fromX-move.prev->toX)==1){
                 moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL});
             }
@@ -350,16 +350,19 @@ void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, 
                 }
 
                 for(int a = nrGeneratedMoves; a < moves.size(); a++){
+                    int previousPiece = board[moves[a].toY][moves[a].toX];
                     if(!makeMove(tempBoard, moves[a], color)){
                         moves[a].fromX = 0;
                         moves[a].fromY = 0;
                         moves[a].toX = 0;
                         moves[a].toY = 0;
                     }else{
-                        forceMove(tempBoard, moves[a].reverseMove());
+                        forceMove(tempBoard, moves[a].reverseMove(), previousPiece);
                     }
+                    cout << moves[a].toString();
                 }
                 nrGeneratedMoves = moves.size();
+                cout << "\n";
             }
         }
     }
@@ -447,6 +450,10 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, b
         printBoard(board);
         generateMoves(board, color, moves, curMove, castlingRights);
 
+        // for(auto i : moves){
+        //     cout << i.toString();
+        // }
+
         if(allMovesNull(moves)){
             if(kingInCheck(board, color)){
                 gameState = color ? BLACK_WIN : WHITE_WIN;
@@ -494,10 +501,10 @@ void postGameOutput(int endState){
 
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
-    setUpBoard(board, "2r4k/2p1PQpp/q7/5p2/2n2P2/2P3P1/P6P/5K2");
+    setUpBoard(board);
 
     pair<bool, bool> castlingRights = {true, true};
 
-    postGameOutput(gameLoop(board, USER_V_USER, false, castlingRights));
+    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
 
 }
