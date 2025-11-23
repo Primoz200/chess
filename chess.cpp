@@ -20,10 +20,10 @@ using namespace std;
 
 //map<int, string> figure = {{0, "-"},{1, "P"},{2, "R"},{3, "N"},{4, "B"},{5, "Q"},{6, "K"},{7, "p"},{8, "r"},{9, "n"},{10, "b"},{11, "q"},{12, "k"}};
 
-map<char, int> figureStr2number = {{'-', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},{'Q', 5},{'K', 6},{'p', 7},{'r', 8},{'n', 9},{'b', 10},{'q', 11},{'k', 12}};
+map<char, int> figureStr2number = {{' ', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},{'Q', 5},{'K', 6},{'p', 7},{'r', 8},{'n', 9},{'b', 10},{'q', 11},{'k', 12}};
 
 map<int, string> figure = {
-    {0, "-"},
+    {0, " "},
     {1, "♙"},
     {2, "♖"},
     {3, "♘"},
@@ -62,27 +62,38 @@ void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/P
     }
 }
 
-void printBoard(vector<vector<int>> &v) {
-    cout << "   ";
-    for (int k = 0; k < 8; k++) {
-        cout << string(1, 'A' + k);
-        cout << " "; 
+void printChars(char c, int n){
+    cout << "--";
+    for(int i = 0; i < n; i++){
+        if(i % 4 == 0) cout << "|";
+        else cout << "-";
     }
+}
+
+
+void printBoard(vector<vector<int>> &v) {
+    cout << "  ";
+    for (int k = 0; k < 8; k++) {
+        cout << "| " << string(1, 'A' + k) << " ";
+    }
+    cout << "|\n";
+    printChars('-', 33);
     cout << "\n";
     for (int i = 0; i < v.size(); i++) {
-        cout << (8-i) << ": ";
+        cout << (8-i) << " | ";
         for (int j = 0; j < v[i].size(); j++) {
-            cout << figure[v[i][j]] << " ";
+            cout << figure[v[i][j]] << " | ";
             // if (v[i][j] < 10) { cout << " "; }
         }
-    cout << "\n";
+        cout << "\n";
+        printChars('-', 33);
+        cout << "\n";
     }
-    cout << "   ";
+    cout << "  ";
     for (int k = 0; k < 8; k++) {
-        cout << string(1, 'A' + k);
-        cout << " "; 
+        cout << "| " << string(1, 'A' + k) << " ";
     }
-    cout << "\n";
+    cout << "|\n";
 }
 
 void printBitboard(uint64_t a) {
