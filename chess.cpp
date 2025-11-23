@@ -24,18 +24,18 @@ map<char, int> figureStr2number = {{' ', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},
 
 map<int, string> figure = {
     {0, " "},
-    {1, "♙"},
-    {2, "♖"},
-    {3, "♘"},
-    {4, "♗"},
-    {5, "♕"},
-    {6, "♔"},
-    {7, "♟"},
-    {8, "♜"},
-    {9, "♞"},
-    {10, "♝"},
-    {11, "♛"},
-    {12, "♚"}
+    {1, "♟"},
+    {2, "♜"},
+    {3, "♞"},
+    {4, "♝"},
+    {5, "♛"},
+    {6, "♚"},
+    {7, "♙"},
+    {8, "♖"},
+    {9, "♘"},
+    {10, "♗"},
+    {11, "♕"},
+    {12, "♔"}
 };
 
 void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<bool, bool>> options={{true, true},  {true, true}}){
@@ -523,9 +523,6 @@ void postGameOutput(int endState){
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
-
-    cout << "\033[0m";
-    cout << "♟♟♟♟♟♟♟♟\n";
 
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);
