@@ -18,36 +18,24 @@ using namespace std;
 #define BLACK_WIN 3
 #define STALEMATE 4
 
+//map<int, string> figure = {{0, "-"},{1, "P"},{2, "R"},{3, "N"},{4, "B"},{5, "Q"},{6, "K"},{7, "p"},{8, "r"},{9, "n"},{10, "b"},{11, "q"},{12, "k"}};
+
+map<char, int> figureStr2number = {{'-', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},{'Q', 5},{'K', 6},{'p', 7},{'r', 8},{'n', 9},{'b', 10},{'q', 11},{'k', 12}};
+
 map<int, string> figure = {
     {0, "-"},
-    {1, "P"},
-    {2, "R"},
-    {3, "N"},
-    {4, "B"},
-    {5, "Q"},
-    {6, "K"},
-    {7, "p"},
-    {8, "r"},
-    {9, "n"},
-    {10, "b"},
-    {11, "q"},
-    {12, "k"}
-};
-
-map<char, int> reverseFigure = {
-    {'-', 0},
-    {'P', 1},
-    {'R', 2},
-    {'N', 3},
-    {'B', 4},
-    {'Q', 5},
-    {'K', 6},
-    {'p', 7},
-    {'r', 8},
-    {'n', 9},
-    {'b', 10},
-    {'q', 11},
-    {'k', 12}
+    {1, "♙"},
+    {2, "♖"},
+    {3, "♘"},
+    {4, "♗"},
+    {5, "♕"},
+    {6, "♔"},
+    {7, "♟"},
+    {8, "♜"},
+    {9, "♞"},
+    {10, "♝"},
+    {11, "♛"},
+    {12, "♚"}
 };
 
 void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<bool, bool>> options={{true, true},  {true, true}}){
@@ -68,7 +56,7 @@ void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/P
                 nextSquare++;
             }
         }else{
-            v[nextSquare/8][nextSquare%8] = reverseFigure[a];
+            v[nextSquare/8][nextSquare%8] = figureStr2number[a];
             nextSquare++;
         }
     }
@@ -524,6 +512,9 @@ void postGameOutput(int endState){
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
+
+    cout << "\033[0m";
+    cout << "♟♟♟♟♟♟♟♟\n";
 
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);
