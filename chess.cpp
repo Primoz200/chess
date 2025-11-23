@@ -359,10 +359,8 @@ void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, 
                     }else{
                         forceMove(tempBoard, moves[a].reverseMove(), previousPiece);
                     }
-                    cout << moves[a].toString();
                 }
                 nrGeneratedMoves = moves.size();
-                cout << "\n";
             }
         }
     }
