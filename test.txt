@@ -1,18 +1,8 @@
-e2e4 e7e5
-g1f3 b8c6
-f1b5 g8f6
-b5c6 d7c6
-e1g1 f8d6
-d2d4 e5d4
-f3d4 c6c5
-d4b5 c5c4
-b5d6 c7d6
-d1d6 c8e6
-d6e6 f7e6
-f1e1 d8e7
-e4e5 d6e5
-e1e5 g7g6
-c2c4 e7d6
-e5e6 d6d1
-e6e8
+h2h4 h7h6
+h1h2 h6h5
+h2h1 b7b6
+g1f3 a7a6
+e2e4 a6a5
+f1c4 a5a4
+e1g1
 q

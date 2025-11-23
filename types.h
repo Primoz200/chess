@@ -52,6 +52,7 @@ class Move {
                 fromY = 0;
                 toX = 0;
                 toY = 0;
+                return;
             }
             fromX = moveS[0] - 'a';
             fromY = 7 - (moveS[1] - '1');
@@ -84,6 +85,17 @@ class Move {
             return {toX, toY, fromX, fromY, NULL};
         }
 
+};
+
+#endif
+#ifndef CastlingRights_H
+#define CastlingRights_H
+
+struct CastlingRights{
+    bool whiteRight;
+    bool whiteLeft;
+    bool blackRight;
+    bool blackLeft;
 };
 
 #endif

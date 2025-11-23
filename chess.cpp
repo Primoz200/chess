@@ -5,7 +5,7 @@
 #include <array>
 #include <stdint.h>
 #include "bitBoards.h"
-#include "Move.h"
+#include "types.h"
 #include "bot.h"
 
 using namespace std;
@@ -49,6 +49,13 @@ map<char, int> reverseFigure = {
     {'q', 11},
     {'k', 12}
 };
+
+void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<bool, bool>> options={{true, true},  {true, true}}){
+    rights->whiteRight=options.first.first;
+    rights->whiteLeft=options.first.second;
+    rights->blackRight=options.second.first;
+    rights->blackLeft=options.second.second;
+}
 
 
 void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR") {
@@ -180,7 +187,7 @@ void generateSlidingMoves(vector<vector<int>> &board, vector<Move> &initial, int
 
 }
 
-void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, pair<bool, bool> &castlingRights){
+void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, CastlingRights &castlingRights){
     bool color = board[move.fromY][move.fromX] >= 7 ? 0 : 1;
 
     vector<vector<int>> tempBoard = board;
@@ -214,7 +221,8 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
     int rookNr = color ? 2 : 8;
     int kingNr = color ? 6 : 12;
     int rank = color ? 7 : 0;
-    if(((color && castlingRights.first) || (!color && castlingRights.second)) && !kingInCheck(board, color)){
+
+    if(((color && castlingRights.whiteRight) || (!color && castlingRights.blackRight)) && !kingInCheck(board, color)){
         if(move.fromX == 4 && move.fromY == rank){
             if(tempBoard[move.fromY][move.fromX+1] == 0 && tempBoard[move.fromY][move.fromX+2] == 0 && tempBoard[move.fromY][move.fromX+3] == rookNr){
                 tempBoard[move.fromY][move.fromX+1] = kingNr;
@@ -225,7 +233,11 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 tempBoard[move.fromY][move.fromX+1] = 0;
                 tempBoard[move.fromY][move.fromX] = kingNr;
             }
-            
+        }
+    }
+
+    if(((color && castlingRights.whiteLeft) || (!color && castlingRights.blackLeft)) && !kingInCheck(board, color)){
+        if(move.fromX == 4 && move.fromY == rank){
             if(tempBoard[move.fromY][move.fromX-1] == 0 && tempBoard[move.fromY][move.fromX-2] == 0 && tempBoard[move.fromY][move.fromX-3] == 0 && tempBoard[move.fromY][move.fromX-4] == rookNr){
                 tempBoard[move.fromY][move.fromX-1] = kingNr;
                 tempBoard[move.fromY][move.fromX] = 0;
@@ -305,7 +317,7 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
     }
 }
 
-void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move &lastMove, pair<bool, bool> &castlingRights){
+void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, Move &lastMove, CastlingRights &castlingRights){
     vector<vector<int>> tempBoard = board;
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
     moves.clear();
@@ -366,7 +378,7 @@ void generateMoves(vector<vector<int>> &board, bool color, vector<Move> &moves, 
     }
 }
 
-void kings(vector<vector<int>> &board, Move &move, pair<bool, bool> &castlingRights){
+void kings(vector<vector<int>> &board, Move &move, CastlingRights &castlingRights){
     bool color = board[move.fromY][move.fromX]==6 ? true : false;
 
     if(move.fromX-move.toX == 2) {
@@ -377,7 +389,8 @@ void kings(vector<vector<int>> &board, Move &move, pair<bool, bool> &castlingRig
         board[move.fromY][move.fromX+1] = board[move.fromY][move.fromX+3];
         board[move.fromY][move.fromX+3] = 0;
     }        
-    color ? castlingRights.first = false : castlingRights.second = false;
+    if(color) {castlingRights.whiteRight = false; castlingRights.whiteLeft = false;}
+    else {castlingRights.blackRight = false; castlingRights.blackRight = false;}
     makeMove(board, move, color);
 }
 
@@ -398,7 +411,16 @@ void pawns(vector<vector<int>> &board, Move move, bool color){
     makeMove(board, move, color);
 }
 
-bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, bool> &castlingRights) { // returns true if move was made
+void rooks(vector<vector<int>> &board, Move move, bool color, CastlingRights &castlingRights){
+    if(move.fromX==7 && move.fromY==7) {castlingRights.whiteRight=false;}
+    if(move.fromX==0 && move.fromY==7) {castlingRights.whiteLeft=false;}
+    if(move.fromX==0 && move.fromY==0) {castlingRights.blackLeft=false;}
+    if(move.fromX==7 && move.fromY==0) {castlingRights.blackRight=false;}
+
+    makeMove(board, move, color);
+ }
+
+bool evalCurMove(vector<vector<int>> &board, Move move, bool color, CastlingRights &castlingRights) { // returns true if move was made
     int figura = board[move.fromY][move.fromX];
     if(figura == 0) return false;
     bool valid = false;
@@ -409,8 +431,10 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool color, pair<bool, b
         case 1:
             pawns(board, move, color);
             break;
-        case 2:                         //knights bishops rooks and queens dont have special moves that have to be handled seperatly
-        case 3:
+        case 2:
+            rooks(board, move, color, castlingRights);
+            break;             
+        case 3:                         //knights bishops and queens dont have special moves that have to be handled seperatl
         case 4:
         case 5:
             makeMove(board, move, color);
@@ -436,7 +460,7 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
     }
 }
 
-int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, pair<bool, bool> &castlingRights ) {
+int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, CastlingRights &castlingRights ) {
     int gameState = IN_GAME;
     string moveString;
     vector<Move> moves;
@@ -501,7 +525,8 @@ int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
 
-    pair<bool, bool> castlingRights = {true, true};
+    CastlingRights castlingRights;
+    resetCastlingRights(&castlingRights);
 
     postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
 
