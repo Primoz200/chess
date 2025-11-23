@@ -1,6 +1,5 @@
 #include <vector>
-#include "Move.h"
-
+#include "types.h"
 
 using namespace std;
 

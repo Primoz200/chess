@@ -1,8 +1,8 @@
-e2e4 
-a7a6
-e4e5
-f7f5
-e5f6
-c7c6
-f6f7
+h2h4 h7h6
+h1h2 h6h5
+h2h1 b7b6
+g1f3 a7a6
+e2e4 a6a5
+f1c4 a5a4
+e1g1
 q
