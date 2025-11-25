@@ -395,12 +395,12 @@ void kings(vector<vector<int>> &board, Move &move, CastlingRights &castlingRight
 
 void pawns(vector<vector<int>> &board, Move move, bool color){
     if(color && move.prev->fromY==1 && move.prev->toY==3){
-        if(move.toX == move.prev->toX && move.toY == 2 ){
+        if(move.toX == move.prev->toX && move.toY == 2 && move.toY+1 < 8){
             board[move.toY+1][move.toX] = 0;
         }
     }
     if(!color && move.prev->fromY==6 && move.prev->toY==4){
-        if(move.toX == move.prev->toX && move.toY == 5){
+        if(move.toX == move.prev->toX && move.toY == 5 && move.toY-1 >= 0){
             board[move.toY-1][move.toX] = 0;
         }
     }
