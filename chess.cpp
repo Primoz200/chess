@@ -452,10 +452,15 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
             cin >> strMove;
         }else{
             strMove = getBotMove(board, moves);
+            while(strMove == "a8a8"){
+                strMove = getBotMove(board, moves);
+            }
+            cout << strMove;
         }
     }
     else if(typeOfGame == BOT_V_BOT){
         strMove = getBotMove(board, moves);
+        cout << strMove;
     }
 }
 
@@ -465,6 +470,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, CastlingRigh
     vector<Move> moves;
     Move nullMove = {0, 0, 0, 0, NULL};
     Move curMove = {0, 0, 0, 0, &nullMove};
+    int moveNr = 1;
 
     while(gameState == IN_GAME){
         cout << "\033[2J\033[1;1H";
@@ -503,6 +509,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int color, CastlingRigh
 
         evalCurMove(board, curMove, color, castlingRights);
         color = !color;
+        moveNr++;
     }
 
     return gameState;
@@ -527,6 +534,5 @@ int main() {
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);
 
-    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
-
+    postGameOutput(gameLoop(board, USER_V_BOT, true, castlingRights));
 }

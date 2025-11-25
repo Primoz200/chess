@@ -63,15 +63,14 @@ class Move {
         string move2String(){
             string res; 
 
-            res += 
-                to_string('a' + fromX) +=
-                to_string('7' - fromY) +=
-                to_string('a' + toX) +=
-                to_string('7' - toY);
+            res.push_back('a' + fromX);
+            res.push_back('8' - fromY);
+            res.push_back('a' + toX);
+            res.push_back('8' - toY);
 
             return res;
         }
-
+        
         bool equals(Move &move){
             return fromX == move.fromX && fromY == move.fromY &&
                    toX == move.toX && toY == move.toY;
