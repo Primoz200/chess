@@ -2,8 +2,9 @@
 #include <vector>
 #include <string>
 #include <map> 
-#include <array>
 #include <stdint.h>
+#include <thread> //just for timer
+#include <chrono>
 #include "bitBoards.h"
 #include "types.h"
 #include "bot.h"
@@ -406,9 +407,12 @@ void pawns(vector<vector<int>> &board, Move move, bool isWhite){
         }
     }
     if(move.toY == 0 || move.toY == 7){
+        makeMove(board, move, isWhite);
         board[move.toY][move.toX] = isWhite ? 5 : 11;
+        return;
     }
     makeMove(board, move, isWhite);
+    return;
 }
 
 void rooks(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights){
@@ -444,7 +448,7 @@ bool evalCurMove(vector<vector<int>> &board, Move move, bool isWhite, CastlingRi
     return valid;
 }
 
-void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool isWhite){
+void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool isWhite, int gamestate){
     if(typeOfGame == USER_V_USER){
         strMove = "";
         cin >> strMove;
@@ -452,16 +456,16 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
         if(isWhite){
             cin >> strMove;
         }else{
-            strMove = getBotMove(board, moves);
-            while(strMove == "a8a8"){
-                strMove = getBotMove(board, moves);
-            }
+            strMove = getBotMove(board, moves, isWhite, gamestate);
+
             cout << strMove;
         }
     }
     else if(typeOfGame == BOT_V_BOT){
-        strMove = getBotMove(board, moves);
+        strMove = getBotMove(board, moves, isWhite, gamestate);
+
         cout << strMove;
+        this_thread::sleep_for(chrono::milliseconds(100));
     }
 }
 
@@ -481,7 +485,7 @@ int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite){
         for(int j = 0; j < 8; j++){
             int value = 0;
             if(board[j][i] == 0) continue;      //checking columns first since more likely to exit earlier
-            switch (board[i][j] % 6){
+            switch (board[j][i] % 6){
                 case 1:
                 case 2:
                 case 5:
@@ -504,7 +508,7 @@ int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite){
     return IN_GAME;
 }
 
-int gameLoop(vector<vector<int>> &board, int typeOfGame, int isWhite, CastlingRights &castlingRights ) {
+int gameLoop(vector<vector<int>> &board, int isWhite, CastlingRights &castlingRights ) {
     int gameState = IN_GAME;
     string moveString;
     vector<Move> moves;
@@ -512,22 +516,25 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int isWhite, CastlingRi
     Move curMove = {0, 0, 0, 0, &nullMove};
     int moveNr = 1;
 
+    int typeOfGame;
+    cout << "Your desired type of game. 1-user_v_user 2-user_v_bot 3-bot_v_bott: ";
+    cin >> typeOfGame; 
+
     while(gameState == IN_GAME){
         cout << "\033[2J\033[1;1H";
         printBoard(board);
+        //cout << (moveNr/2+1) << "  ";
         generateMoves(board, isWhite, moves, curMove, castlingRights);
 
-        // for(auto i : moves){
-        //     cout << i.toString();
-        // }
         gameState = getGameState(board, moves, isWhite);
+        if(gameState != IN_GAME) return gameState;
         
         
         if(isWhite){ cout << "White to move:\n";}
         else { cout << "Black to move:\n";}
 
         curMove.updatePrevMove();
-        getMove(moveString, board, moves, typeOfGame, isWhite);
+        getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
         curMove.string2move(moveString);
         while(!checkIfMoveInVector(curMove, moves)){
             if(moveString == "q") {gameState = STALEMATE; break;}
@@ -536,7 +543,7 @@ int gameLoop(vector<vector<int>> &board, int typeOfGame, int isWhite, CastlingRi
             if(isWhite){ cout << "White to move:\n";}
             else { cout << "Black to move:\n";}
 
-            getMove(moveString, board, moves, typeOfGame, isWhite);
+            getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
             curMove.string2move(moveString);
         }
 
@@ -569,5 +576,5 @@ int main() {
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);
 
-    postGameOutput(gameLoop(board, USER_V_USER, true, castlingRights));
+    postGameOutput(gameLoop(board, true, castlingRights));
 }

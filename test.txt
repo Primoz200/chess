@@ -1,8 +1,6 @@
-h2h4 h7h6
-h1h2 h6h5
-h2h1 b7b6
-g1f3 a7a6
-e2e4 a6a5
-f1c4 a5a4
-e1g1
+e2e4 a7a5
+e4e5 a5a4
+e5e6 d7d6
+e6f7 e8d7
+f7g8 a4a3
 q
