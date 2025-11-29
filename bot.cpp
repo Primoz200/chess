@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <string>
 #include <map>
+#include "chess.h"
+#include <iostream>
 
 #define IN_GAME 1
 #define WHITE_WIN 2
@@ -22,7 +24,7 @@ map<int, int> pieceWorth = {
     {6, 40}
 };
 
-vector<vector<int>> pawnValue = {
+const vector<vector<int>> pawnValue = {
     {15, 15, 15, 15, 15, 15, 15, 15},
     {14, 14, 15, 15, 15, 15, 14, 14},
     {12, 11, 11, 12, 12, 11, 11, 12},
@@ -33,7 +35,7 @@ vector<vector<int>> pawnValue = {
     {10, 10, 10, 10, 10, 10, 10, 10}
 };
 
-vector<vector<int>> knightValue = {
+const vector<vector<int>> knightValue = {
     {24, 26, 28, 28, 28, 28, 26, 24},
     {26, 28, 30, 30, 30, 30, 28, 26},
     {26, 30, 32, 32, 32, 32, 30, 26},
@@ -44,7 +46,7 @@ vector<vector<int>> knightValue = {
     {24, 26, 28, 28, 28, 28, 26, 24}
 };
 
-vector<vector<int>> kingValueMiddleGame = {
+const vector<vector<int>> kingValueMiddleGame = {
     {30, 30, 30, 30, 30, 30, 30, 30},
     {30, 30, 30, 30, 30, 30, 30, 30},
     {30, 30, 30, 30, 30, 30, 30, 30},
@@ -74,12 +76,7 @@ int boolColorMultiplier(bool a){
     return a ? 1 : -1;
 }
 
-void forceMoveH(vector<vector<int>> &board, Move move, int oldPiece=0){                 //ONLY use on tempboards
-    board[move.toY][move.toX] = board[move.fromY][move.fromX];
-    board[move.fromY][move.fromX] = oldPiece;
-}
-
-int evaluate(vector<vector<int>> &board, bool isWhite, int gamestate){
+int evaluate(vector<vector<int>> &board, int gamestate){
     int eval = 0;
     int pieceCount=0;
     pair<int,int> whiteKingPosition = {-1, -1};
@@ -104,7 +101,9 @@ int evaluate(vector<vector<int>> &board, bool isWhite, int gamestate){
                 }
             }
             else if(piece%6 == 1){
-                int pawnV = isWhite ? pawnValue[y][x] : pawnValue[7-y][x];
+                int pawnV;
+                if(piece == 1) pawnV = pawnValue[y][x];
+                else pawnV = pawnValue[7-y][x];
                 eval += colorMultiplier(piece) * pawnV;
             }
             else if(piece % 6 == 3){
@@ -123,34 +122,48 @@ int evaluate(vector<vector<int>> &board, bool isWhite, int gamestate){
     return eval;
 }
 
-string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, int gamestate){
-    shuffleVector(moves);
+
+int minMax(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate, int depth){
+    if(depth >=10 || gamestate != IN_GAME){
+        return evaluate(board, gamestate);
+    }
+
+    if(isWhite){
+        int bestEval = -1;
+    }
+    for(int i = 0; i < moves.size(); i++){
+        if(moves[i].isNull()) continue;
+    }
+}
+
+string getBotMove(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, int gamestate){
     vector<vector<int>> tempBoard(8, vector<int>(8, 0));
     tempBoard = board;
     string s = "";
 
-    int maxEval = isWhite ? -10001 : 10001;
-    int indMove = -1;
-    for(int i = 0; i < moves.size(); i++){
-        if(moves[i].isNull()) continue;
 
-        int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
-        forceMoveH(tempBoard, moves[i]);      //since moves in vector moves are all legal
 
-        int newEval = evaluate(tempBoard, isWhite, gamestate);
-        if(newEval*boolColorMultiplier(isWhite) > maxEval*boolColorMultiplier(isWhite)){
-            maxEval = newEval;
-            indMove = i;
-        }
+    // for(int i = 0; i < moves.size(); i++){
+    //     if(moves[i].isNull()) continue;
 
-        forceMoveH(tempBoard, moves[i].reverseMove(), oldPiece);
-    }
+    //     int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
 
-    if(indMove != -1) return moves[indMove].move2String();
-    else {
-        for(auto m : moves){
-            if(!m.isNull()) return m.move2String();
-        }
-    }
+    //     executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
+
+    //     int newEval = evaluate(tempBoard, gamestate);
+    //     if(newEval*boolColorMultiplier(isWhite) > maxEval*boolColorMultiplier(isWhite)){
+    //         maxEval = newEval;
+    //         indMove = i;
+    //     }
+
+    //     forceMove(tempBoard, moves[i].reverseMove(), oldPiece);
+    // // }
+
+    // if(indMove != -1) return moves[indMove].move2String();
+    // else {
+    //     for(auto m : moves){
+    //         if(!m.isNull()) return m.move2String();
+    //     }
+    // }
     return s;
 }

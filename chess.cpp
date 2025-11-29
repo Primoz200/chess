@@ -307,6 +307,7 @@ void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves
 
                 for(int a = nrGeneratedMoves; a < moves.size(); a++){
                     int previousPiece = board[moves[a].toY][moves[a].toX];
+                    moves[a].prev = &lastMove;
                     if(!makeMove(tempBoard, moves[a], isWhite)){
                         moves[a].fromX = 0;
                         moves[a].fromY = 0;
@@ -391,7 +392,7 @@ bool executeCurMove(vector<vector<int>> &board, Move move, bool isWhite, Castlin
     return valid;
 }
 
-void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool isWhite, int gamestate){
+void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool isWhite, CastlingRights& castlingRights, int gamestate){
     if(typeOfGame == USER_V_USER){
         strMove = "";
         cin >> strMove;
@@ -399,13 +400,13 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
         if(isWhite){
             cin >> strMove;
         }else{
-            strMove = getBotMove(board, moves, isWhite, gamestate);
+            strMove = getBotMove(board, isWhite, castlingRights, gamestate);
 
             cout << strMove;
         }
     }
     else if(typeOfGame == BOT_V_BOT){
-        strMove = getBotMove(board, moves, isWhite, gamestate);
+        strMove = getBotMove(board, isWhite, castlingRights, gamestate);
 
         cout << strMove;
         this_thread::sleep_for(chrono::milliseconds(100));

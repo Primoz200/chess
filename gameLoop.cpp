@@ -73,7 +73,7 @@ void printBitboard(uint64_t a) {
     }
 }
 
-int gameLoop(vector<vector<int>> &board, int isWhite, CastlingRights &castlingRights ) {
+int gameLoop(vector<vector<int>> &board, bool isWhite, CastlingRights &castlingRights) {
     int gameState = IN_GAME;
     string moveString;
     vector<Move> moves;
@@ -99,7 +99,7 @@ int gameLoop(vector<vector<int>> &board, int isWhite, CastlingRights &castlingRi
         else { cout << "Black to move:\n";}
 
         curMove.updatePrevMove();
-        getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
+        getMove(moveString, board, moves, typeOfGame, isWhite, castlingRights, gameState);
         curMove.string2move(moveString);
         while(!checkIfMoveInVector(curMove, moves)){
             if(moveString == "q") {gameState = STALEMATE; break;}
@@ -108,7 +108,7 @@ int gameLoop(vector<vector<int>> &board, int isWhite, CastlingRights &castlingRi
             if(isWhite){ cout << "White to move:\n";}
             else { cout << "Black to move:\n";}
 
-            getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
+            getMove(moveString, board, moves, typeOfGame, isWhite, castlingRights, gameState);
             curMove.string2move(moveString);
         }
 
