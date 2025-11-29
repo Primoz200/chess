@@ -24,21 +24,6 @@ using namespace std;
 
 map<char, int> figureStr2number = {{' ', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},{'Q', 5},{'K', 6},{'p', 7},{'r', 8},{'n', 9},{'b', 10},{'q', 11},{'k', 12}};
 
-map<int, string> figure = {
-    {0, " "},
-    {1, "♟"},
-    {2, "♜"},
-    {3, "♞"},
-    {4, "♝"},
-    {5, "♛"},
-    {6, "♚"},
-    {7, "♙"},
-    {8, "♖"},
-    {9, "♘"},
-    {10, "♗"},
-    {11, "♕"},
-    {12, "♔"}
-};
 
 void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<bool, bool>> options={{true, true},  {true, true}}){
     rights->whiteRight=options.first.first;
@@ -61,48 +46,6 @@ void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/P
             v[nextSquare/8][nextSquare%8] = figureStr2number[a];
             nextSquare++;
         }
-    }
-}
-
-void printChars(char c, int n){
-    cout << "--";
-    for(int i = 0; i < n; i++){
-        if(i % 4 == 0) cout << "|";
-        else cout << "-";
-    }
-}
-
-
-void printBoard(vector<vector<int>> &v) {
-    cout << "  ";
-    for (int k = 0; k < 8; k++) {
-        cout << "| " << string(1, 'A' + k) << " ";
-    }
-    cout << "|\n";
-    printChars('-', 33);
-    cout << "\n";
-    for (int i = 0; i < v.size(); i++) {
-        cout << (8-i) << " | ";
-        for (int j = 0; j < v[i].size(); j++) {
-            cout << figure[v[i][j]] << " | ";
-            // if (v[i][j] < 10) { cout << " "; }
-        }
-        cout << "\n";
-        printChars('-', 33);
-        cout << "\n";
-    }
-    cout << "  ";
-    for (int k = 0; k < 8; k++) {
-        cout << "| " << string(1, 'A' + k) << " ";
-    }
-    cout << "|\n";
-}
-
-void printBitboard(uint64_t a) {
-    for(int i = 0; i < 64; i++){
-        
-        if( i % 8 ==  0) cout << "\n";
-        cout << ((a>>i) & 1L) << " ";
     }
 }
 
@@ -424,7 +367,7 @@ void rooks(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &
     makeMove(board, move, isWhite);
  }
 
-bool evalCurMove(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights) { // returns true if move was made
+bool executeCurMove(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights) { // returns true if move was made
     int figura = board[move.fromY][move.fromX];
     if(figura == 0) return false;
     bool valid = false;
@@ -507,74 +450,6 @@ int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite){
 
     return IN_GAME;
 }
-
-int gameLoop(vector<vector<int>> &board, int isWhite, CastlingRights &castlingRights ) {
-    int gameState = IN_GAME;
-    string moveString;
-    vector<Move> moves;
-    Move nullMove = {0, 0, 0, 0, NULL};
-    Move curMove = {0, 0, 0, 0, &nullMove};
-    int moveNr = 1;
-
-    int typeOfGame;
-    cout << "Your desired type of game. 1-user_v_user 2-user_v_bot 3-bot_v_bott: ";
-    cin >> typeOfGame; 
-
-    while(gameState == IN_GAME){
-        cout << "\033[2J\033[1;1H";
-        printBoard(board);
-        //cout << (moveNr/2+1) << "  ";
-        generateMoves(board, isWhite, moves, curMove, castlingRights);
-
-        gameState = getGameState(board, moves, isWhite);
-        if(gameState != IN_GAME) return gameState;
-        
-        
-        if(isWhite){ cout << "White to move:\n";}
-        else { cout << "Black to move:\n";}
-
-        curMove.updatePrevMove();
-        getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
-        curMove.string2move(moveString);
-        while(!checkIfMoveInVector(curMove, moves)){
-            if(moveString == "q") {gameState = STALEMATE; break;}
-
-            cout << "invalid Move\n";
-            if(isWhite){ cout << "White to move:\n";}
-            else { cout << "Black to move:\n";}
-
-            getMove(moveString, board, moves, typeOfGame, isWhite, gameState);
-            curMove.string2move(moveString);
-        }
-
-        evalCurMove(board, curMove, isWhite, castlingRights);
-        isWhite = !isWhite;
-        moveNr++;
-    }
-
-    return gameState;
-}
-
-void postGameOutput(int endState){
-    if(endState == STALEMATE){
-        cout << "STALEMATE\n";
-    }else if(endState == WHITE_WIN){
-        cout << "WHITE WINS\n";
-    }else if(endState == BLACK_WIN){
-        cout << "BLACK WINS\n";
-    }else if(endState == DRAW){
-        cout << "DRAW BY OTHER CAUSES\n";
-    }
-}
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
 
-int main() {
-    vector<vector<int>> board(8, vector<int>(8, 0));
-    setUpBoard(board);
-
-    CastlingRights castlingRights;
-    resetCastlingRights(&castlingRights);
-
-    postGameOutput(gameLoop(board, true, castlingRights));
-}
