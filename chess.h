@@ -1,10 +1,9 @@
-#ifndef GAME_H
-#define GAME_H
-
 #include <vector>
 #include "types.h"
 #include "bitBoards.h"
 
+#ifndef GAME_H
+#define GAME_H
 
 void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<bool, bool>> options={{true, true},  {true, true}});

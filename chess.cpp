@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include <thread> //just for timer
 #include <chrono>
+#include "bot.h"
 #include "bitBoards.h"
 #include "types.h"
-#include "bot.h"
 
 using namespace std;
 
@@ -400,14 +400,12 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
         if(isWhite){
             cin >> strMove;
         }else{
-            strMove = getBotMove(board, isWhite, castlingRights, gamestate);
-
+            strMove = getBotMove(board, moves, isWhite, castlingRights, gamestate);
             cout << strMove;
         }
     }
     else if(typeOfGame == BOT_V_BOT){
-        strMove = getBotMove(board, isWhite, castlingRights, gamestate);
-
+        strMove = getBotMove(board, moves, isWhite, castlingRights, gamestate);
         cout << strMove;
         this_thread::sleep_for(chrono::milliseconds(100));
     }

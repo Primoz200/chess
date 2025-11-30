@@ -13,6 +13,8 @@
 #define STALEMATE 4
 #define DRAW 5
 
+#define MAX_DEPTH 2
+
 using namespace std;
 
 map<int, int> pieceWorth = {
@@ -122,48 +124,73 @@ int evaluate(vector<vector<int>> &board, int gamestate){
     return eval;
 }
 
-
-int minMax(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate, int depth){
-    if(depth >=10 || gamestate != IN_GAME){
+int minMax(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, Move& lastMove, int gamestate, int depth){
+    if(depth > MAX_DEPTH || gamestate != IN_GAME){
         return evaluate(board, gamestate);
     }
 
-    if(isWhite){
-        int bestEval = -1;
-    }
+    vector<Move> moves;
+    generateMoves(board, isWhite, moves, lastMove, castlingRights);
+
+    vector<vector<int>> tempBoard(8, vector<int>(8, 0));
+    int bestValue = isWhite ? -1001 : 1001;
+
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
+
+        tempBoard = board;
+        executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
+        gamestate = getGameState(board, moves, isWhite);
+        int newValue = minMax(tempBoard, !isWhite, castlingRights, moves[i], gamestate, depth+1);
+
+        if(isWhite){
+            bestValue = max(bestValue, newValue);
+        }else{
+            bestValue = min(bestValue, newValue);
+        }
     }
+
+    return bestValue;
 }
 
-string getBotMove(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, int gamestate){
-    vector<vector<int>> tempBoard(8, vector<int>(8, 0));
-    tempBoard = board;
+string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate){
+    shuffleVector(moves);
     string s = "";
+    vector<vector<int>> tempBoard(8, vector<int>(8, 0));
+    int currentBestEval = isWhite ? -10001 : 10001;
+    int indMove = -1;
 
 
+    for(int i = 0; i < moves.size(); i++){
+        if(moves[i].isNull()) continue;
 
-    // for(int i = 0; i < moves.size(); i++){
-    //     if(moves[i].isNull()) continue;
+        tempBoard = board;
+        int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
 
-    //     int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
+        executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
+        gamestate = getGameState(board, moves, isWhite);
 
-    //     executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
+        int newEval = minMax(tempBoard, !isWhite, castlingRights, moves[i], gamestate, 1);
 
-    //     int newEval = evaluate(tempBoard, gamestate);
-    //     if(newEval*boolColorMultiplier(isWhite) > maxEval*boolColorMultiplier(isWhite)){
-    //         maxEval = newEval;
-    //         indMove = i;
-    //     }
+        if(isWhite){
+            if(newEval > currentBestEval){
+                currentBestEval = newEval;
+                indMove = i;
+            }
+        }else {
+            if(newEval < currentBestEval){
+                currentBestEval = newEval;
+                indMove = i;
+            }
+        }
 
-    //     forceMove(tempBoard, moves[i].reverseMove(), oldPiece);
-    // // }
+    }
 
-    // if(indMove != -1) return moves[indMove].move2String();
-    // else {
-    //     for(auto m : moves){
-    //         if(!m.isNull()) return m.move2String();
-    //     }
-    // }
+    if(indMove != -1) return moves[indMove].move2String();
+    else {
+        for(auto m : moves){
+            if(!m.isNull()) return m.move2String();
+        }
+    }
     return s;
 }

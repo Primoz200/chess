@@ -4,6 +4,7 @@
 #include "chess.h"
 #include "types.h"
 #include "bitBoards.h"
+#include "bot.h"
 
 using namespace std;
 
@@ -73,7 +74,7 @@ void printBitboard(uint64_t a) {
     }
 }
 
-int gameLoop(vector<vector<int>> &board, bool isWhite, CastlingRights &castlingRights) {
+int gameLoop(vector<vector<int>> &board, bool isWhite, CastlingRights &castlingRights ) {
     int gameState = IN_GAME;
     string moveString;
     vector<Move> moves;

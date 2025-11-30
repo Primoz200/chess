@@ -2,6 +2,7 @@
 #include <string>
 #include "types.h"
 
-using namespace std;
-string getBotMove(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, int gamestate);
+#pragma once
 
+using namespace std;
+string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate);
