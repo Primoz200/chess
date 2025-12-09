@@ -13,7 +13,7 @@
 #define STALEMATE 4
 #define DRAW 5
 
-#define MAX_DEPTH 2
+#define MAX_DEPTH 3
 
 using namespace std;
 
@@ -78,6 +78,16 @@ int boolColorMultiplier(bool a){
     return a ? 1 : -1;
 }
 
+void printBoard2(vector<vector<int>> &v) {
+    for(int y = 0; y< 8; y++){
+        for(int x = 0; x < 8; x++){
+            cout << v[y][x] << "  ";
+        }
+        cout << "\n";
+    }
+    cout << "\n";
+}
+
 int evaluate(vector<vector<int>> &board, int gamestate){
     int eval = 0;
     int pieceCount=0;
@@ -112,19 +122,18 @@ int evaluate(vector<vector<int>> &board, int gamestate){
                 eval += colorMultiplier(piece) * knightValue[x][y];
             }
             else{ eval += colorMultiplier(piece) * pieceWorth[piece % 6];}
-    
         }
     }
 
     if(pieceCount > 10){        //arbitratry selected piece number for when it transitions into an endgame
-        eval+=kingValueMiddleGame[whiteKingPosition.second][whiteKingPosition.first];
+        eval+= kingValueMiddleGame[whiteKingPosition.second][whiteKingPosition.first];
         eval+= -kingValueMiddleGame[7 - blackKingPosition.second][blackKingPosition.first];
     }//else endgame table
 
     return eval;
 }
 
-int minMax(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, Move& lastMove, int gamestate, int depth){
+int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, Move& lastMove, int gamestate, int depth, int alpha, int beta){
     if(depth > MAX_DEPTH || gamestate != IN_GAME){
         return evaluate(board, gamestate);
     }
@@ -132,45 +141,52 @@ int minMax(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRig
     vector<Move> moves;
     generateMoves(board, isWhite, moves, lastMove, castlingRights);
 
-    vector<vector<int>> tempBoard(8, vector<int>(8, 0));
-    int bestValue = isWhite ? -1001 : 1001;
+
+    int bestValue = isWhite ? -10001 : 10001;
 
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
 
-        tempBoard = board;
-        executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
+        int oldPiece = board[moves[i].toY][moves[i].toX]; 
+        executeCurMove(board, moves[i], isWhite, castlingRights);
         gamestate = getGameState(board, moves, isWhite);
-        int newValue = minMax(tempBoard, !isWhite, castlingRights, moves[i], gamestate, depth+1);
+        int newValue = alpha_beta(board, !isWhite, castlingRights, moves[i], gamestate, depth+1, alpha, beta);
+        forceMove(board, moves[i].reverseMove(), oldPiece);
 
         if(isWhite){
             bestValue = max(bestValue, newValue);
+            alpha = max(bestValue, alpha);
         }else{
             bestValue = min(bestValue, newValue);
+            beta = min(bestValue, beta);
         }
+
+        if(beta <= alpha) break;
     }
 
     return bestValue;
 }
 
 string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate){
-    shuffleVector(moves);
     string s = "";
     vector<vector<int>> tempBoard(8, vector<int>(8, 0));
+    CastlingRights newCastlingRights;
     int currentBestEval = isWhite ? -10001 : 10001;
     int indMove = -1;
 
-
+    shuffleVector(moves);
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
 
         tempBoard = board;
+        newCastlingRights = castlingRights;
         int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
 
-        executeCurMove(tempBoard, moves[i], isWhite, castlingRights);
-        gamestate = getGameState(board, moves, isWhite);
+        executeCurMove(tempBoard, moves[i], isWhite, newCastlingRights);
+        gamestate = getGameState(tempBoard, moves, isWhite);
 
-        int newEval = minMax(tempBoard, !isWhite, castlingRights, moves[i], gamestate, 1);
+        int newEval = alpha_beta(tempBoard, !isWhite, newCastlingRights, moves[i], gamestate, 1, -10000, 10000);
+        forceMove(tempBoard, moves[i].reverseMove(), oldPiece);
 
         if(isWhite){
             if(newEval > currentBestEval){
