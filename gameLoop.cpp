@@ -91,6 +91,9 @@ int gameLoop(vector<vector<int>> &board, bool isWhite, CastlingRights &castlingR
         printBoard(board);
         //cout << (moveNr/2+1) << "  ";
         generateMoves(board, isWhite, moves, curMove, castlingRights);
+        // for(auto a: moves) {
+        //      cout << a.toString();
+        // }
 
         gameState = getGameState(board, moves, isWhite);
         if(gameState != IN_GAME) return gameState;
@@ -135,7 +138,7 @@ void postGameOutput(int endState){
 
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
-    setUpBoard(board);
+    setUpBoard(board, "r1bq1rk1/1pppppb1/2n3pp/p7/4n2P/PP1P1N2/R1P1PPP1/2BQKB1R");
 
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);

@@ -31,7 +31,7 @@ const vector<vector<int>> pawnValue = {
     {14, 14, 15, 15, 15, 15, 14, 14},
     {12, 11, 11, 12, 12, 11, 11, 12},
     {10, 10, 11, 13, 13, 11, 10, 10},
-    {10, 10, 11, 13, 13, 11, 10, 10},
+    {10, 10, 11, 14, 14, 11, 10, 10},
     {9, 10, 10, 12, 12, 10, 10, 9},
     {9, 10, 10, 10, 10, 10, 10, 9},
     {10, 10, 10, 10, 10, 10, 10, 10}
@@ -56,7 +56,7 @@ const vector<vector<int>> kingValueMiddleGame = {
     {35, 35, 35, 35, 35, 35, 35, 35},
     {38, 38, 38, 38, 38, 38, 38, 38},
     {43, 43, 41, 41, 41, 41, 43, 43},
-    {48, 48, 48, 44, 44, 45, 48, 48}
+    {49, 49, 50, 44, 44, 45, 50, 50}
 };
 
 
@@ -87,7 +87,7 @@ void printBoard2(vector<vector<int>> &v) {
     }
     cout << "\n";
 }
-
+vector<Move> list;
 int evaluate(vector<vector<int>> &board, int gamestate){
     int eval = 0;
     int pieceCount=0;
@@ -126,6 +126,14 @@ int evaluate(vector<vector<int>> &board, int gamestate){
     }
 
     if(pieceCount > 10){        //arbitratry selected piece number for when it transitions into an endgame
+        if(whiteKingPosition.second == -1) {
+            printBoard2(board);
+            for(int i = 0; i < 10; i++){
+            cout << list[i].toString();
+        }
+        }
+
+
         eval+= kingValueMiddleGame[whiteKingPosition.second][whiteKingPosition.first];
         eval+= -kingValueMiddleGame[7 - blackKingPosition.second][blackKingPosition.first];
     }//else endgame table
@@ -133,13 +141,21 @@ int evaluate(vector<vector<int>> &board, int gamestate){
     return eval;
 }
 
-int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, Move& lastMove, int gamestate, int depth, int alpha, int beta){
-    if(depth > MAX_DEPTH || gamestate != IN_GAME){
-        return evaluate(board, gamestate);
-    }
+int counter = 0;
 
+
+int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlingRights, Move& lastMove, int depth, int alpha, int beta){
+    counter++;
+    
     vector<Move> moves;
     generateMoves(board, isWhite, moves, lastMove, castlingRights);
+    int gamestate = getGameState(board, moves, isWhite);
+    
+    if(depth > MAX_DEPTH || gamestate != IN_GAME){
+
+        
+        return evaluate(board, gamestate);
+    }
 
 
     int bestValue = isWhite ? -10001 : 10001;
@@ -147,11 +163,13 @@ int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlin
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
 
+        CastlingRights oldCastling = castlingRights;
         int oldPiece = board[moves[i].toY][moves[i].toX]; 
         executeCurMove(board, moves[i], isWhite, castlingRights);
-        gamestate = getGameState(board, moves, isWhite);
-        int newValue = alpha_beta(board, !isWhite, castlingRights, moves[i], gamestate, depth+1, alpha, beta);
+        list[depth] = moves[i];
+        int newValue = alpha_beta(board, !isWhite, castlingRights, moves[i], depth+1, alpha, beta);
         forceMove(board, moves[i].reverseMove(), oldPiece);
+        castlingRights = oldCastling;
 
         if(isWhite){
             bestValue = max(bestValue, newValue);
@@ -160,7 +178,6 @@ int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlin
             bestValue = min(bestValue, newValue);
             beta = min(bestValue, beta);
         }
-
         if(beta <= alpha) break;
     }
 
@@ -172,9 +189,15 @@ string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite,
     vector<vector<int>> tempBoard(8, vector<int>(8, 0));
     CastlingRights newCastlingRights;
     int currentBestEval = isWhite ? -10001 : 10001;
+    int alpha = -10001;
+    int beta = 10001;
     int indMove = -1;
 
-    shuffleVector(moves);
+    for(int i = 0; i < 10; i++){
+    list.push_back({0, 0, 0, 0, NULL});
+    }
+
+    //shuffleVector(moves);
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
 
@@ -183,24 +206,29 @@ string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite,
         int oldPiece =  tempBoard[moves[i].toY][moves[i].toX];
 
         executeCurMove(tempBoard, moves[i], isWhite, newCastlingRights);
-        gamestate = getGameState(tempBoard, moves, isWhite);
-
-        int newEval = alpha_beta(tempBoard, !isWhite, newCastlingRights, moves[i], gamestate, 1, -10000, 10000);
+        list[0] = moves[i];
+        int newEval = alpha_beta(tempBoard, !isWhite, newCastlingRights, moves[i], 1, alpha, beta);
         forceMove(tempBoard, moves[i].reverseMove(), oldPiece);
 
         if(isWhite){
             if(newEval > currentBestEval){
                 currentBestEval = newEval;
+                alpha = max(alpha, currentBestEval);
                 indMove = i;
             }
         }else {
             if(newEval < currentBestEval){
                 currentBestEval = newEval;
+                beta = min(beta, currentBestEval);
                 indMove = i;
-            }
+            } 
         }
 
+        if(beta <= alpha) break;
     }
+
+
+    cout << counter << "\n";
 
     if(indMove != -1) return moves[indMove].move2String();
     else {
@@ -208,5 +236,6 @@ string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite,
             if(!m.isNull()) return m.move2String();
         }
     }
+
     return s;
 }

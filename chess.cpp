@@ -20,6 +20,11 @@ using namespace std;
 #define STALEMATE 4
 #define DRAW 5
 
+#define CASTLE_RIGHT 1
+#define CASTLE_LEFT 2
+#define PROMOTE 3
+#define EN_PASSANT 4
+
 //map<int, string> figure = {{0, "-"},{1, "P"},{2, "R"},{3, "N"},{4, "B"},{5, "Q"},{6, "K"},{7, "p"},{8, "r"},{9, "n"},{10, "b"},{11, "q"},{12, "k"}};
 
 map<char, int> figureStr2number = {{' ', 0},{'P', 1},{'R', 2},{'N', 3},{'B', 4},{'Q', 5},{'K', 6},{'p', 7},{'r', 8},{'n', 9},{'b', 10},{'q', 11},{'k', 12}};
@@ -77,9 +82,32 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool isWhite) {
     return true;
 }
 
-void forceMove(vector<vector<int>> &board, Move move, int oldPiece=0){                 //ONLY use on tempboards
+void forceMove(vector<vector<int>> &board, Move move, int oldPiece){                
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = oldPiece;
+
+    if(move.flag != 0){                     //Force move will be used with reversed moves so relative position is different than normal special move
+        switch(move.flag) {
+            case CASTLE_RIGHT:
+                board[move.fromY][7] = board[move.fromY][move.fromX-1];
+                board[move.fromY][move.fromX-1] = 0;
+                break;
+            case CASTLE_LEFT:
+                board[move.fromY][0] = board[move.fromY][move.fromX+1];
+                board[move.fromY][move.fromX+1] = 0;
+                break;
+            case PROMOTE:
+                board[move.toY][move.toX] = board[move.toY][move.toX] == 5 ? 1 : 7;
+                break;
+            case EN_PASSANT:
+                if(board[move.toY][move.toX] == 1){  //isWhite
+                    board[move.fromY+1][move.fromX] = 7;
+                }else{
+                    board[move.fromY-1][move.fromX] = 1;
+                }
+                break;
+        }
+    } 
 }
 
 int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value is the index of the move + 1 to make enPassant checks easier while also being valid if index = 0
@@ -110,11 +138,11 @@ bool insideBoard(Move &move) {                              //checks that its in
 void generateSlidingMoves(vector<vector<int>> &board, vector<Move> &initial, int j, int i, int dirx, int diry){    //j and i suplement move.from X and move.fromY for less needed info
     int x = dirx, y = diry;
     
-    bool isWhiteOfAttackingPiece = board[i][j] < 7 ? true : false; 
+    bool isWhite = board[i][j] < 7 ? true : false; 
     while(i + y >= 0 && i + y <= 7 && j + x >= 0 && j + x <= 7){
         if(board[i+y][j+x] == 0){
             initial.push_back({j, i, j+x, i+y, NULL});
-        }else if(isWhiteOfAttackingPiece){
+        }else if(isWhite){
             if(board[i+y][j+x] >= 7){
                 initial.push_back({j, i, j+x, i+y, NULL});
             }
@@ -172,7 +200,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 tempBoard[move.fromY][move.fromX+1] = kingNr;
                 tempBoard[move.fromY][move.fromX] = 0;
                 if(!kingInCheck(tempBoard, isWhite)){
-                    moves.push_back({move.fromX, move.fromY, move.fromX+2, move.fromY, NULL});
+                    moves.push_back({move.fromX, move.fromY, move.fromX+2, move.fromY, NULL, CASTLE_RIGHT});
                 }
                 tempBoard[move.fromY][move.fromX+1] = 0;
                 tempBoard[move.fromY][move.fromX] = kingNr;
@@ -186,7 +214,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 tempBoard[move.fromY][move.fromX-1] = kingNr;
                 tempBoard[move.fromY][move.fromX] = 0;
                 if(!kingInCheck(tempBoard, isWhite)){
-                    moves.push_back({move.fromX, move.fromY, move.fromX-2, move.fromY, NULL});
+                    moves.push_back({move.fromX, move.fromY, move.fromX-2, move.fromY, NULL, CASTLE_LEFT});
                 }
                 tempBoard[move.fromY][move.fromX-1] = 0;
                 tempBoard[move.fromY][move.fromX] = kingNr;
@@ -196,43 +224,46 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
 }
 
 void generatePawnMoves(vector<vector<int>> &board, vector<Move>& moves, Move &move, bool isWhite){
+    int flag = 0;
+    
     if(isWhite){
+        if(move.fromY-1 == 0) flag = PROMOTE; 
         if(board[move.fromY-1][move.fromX] == 0){
-            
-            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-1, NULL, flag});
 
             if(move.fromY-2 >= 0 && board[move.fromY-2][move.fromX] == 0 && move.fromY == 6){
                 moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY-2, NULL});
             }
         }
         if(move.fromX+1 < 8 && board[move.fromY-1][move.fromX+1] >= 7){
-            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY-1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY-1, NULL, flag});
         }
         if(move.fromX-1 >= 0 && board[move.fromY-1][move.fromX-1] >= 7){
-            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY-1, NULL, flag});
         }
         if(move.prev->fromY == 1 && move.prev->toY == 3 && board[move.prev->toY][move.prev->toX] == 7){
             if(move.fromY == 3 && abs(move.fromX-move.prev->toX)==1){
-                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL});
+                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY-1, NULL, EN_PASSANT});
             }
         }
     }else { 
+        if(move.fromY+1 == 7) flag = PROMOTE;
         if(board[move.fromY+1][move.fromX] == 0){
-            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+1, NULL, flag});
 
             if(move.fromY+2 < 8 && board[move.fromY+2][move.fromX] == 0 && move.fromY == 1){
                 moves.push_back({move.fromX, move.fromY, move.fromX, move.fromY+2, NULL});
             }
         }
         if(move.fromX+1 < 8 && board[move.fromY+1][move.fromX+1] <= 6 && board[move.fromY+1][move.fromX+1] != 0){
-            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY+1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX+1, move.fromY+1, NULL, flag});
         }
         if(move.fromX-1 >= 0 && board[move.fromY+1][move.fromX-1] <= 6 && board[move.fromY+1][move.fromX-1] != 0){
-            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL});
+            moves.push_back({move.fromX, move.fromY, move.fromX-1, move.fromY+1, NULL, flag});
         }
         if(move.prev->fromY == 6 && move.prev->toY == 4 && board[move.prev->toY][move.prev->toX] == 1){
             if(move.fromY == 4  && abs(move.fromX-move.prev->toX)==1){
-                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL});
+                moves.push_back({move.fromX, move.fromY, move.prev->fromX, move.fromY+1, NULL, EN_PASSANT});
             }
         }
     }

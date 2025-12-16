@@ -11,13 +11,15 @@ class Move {
         int toX;
         int toY;
         Move* prev;
+        int flag;
 
-        Move(int x1, int y1, int x2, int y2, Move* pr) {
+        Move(int x1, int y1, int x2, int y2, Move* pr, int flags = 0) {
             fromX = x1;
             fromY = y1;
             toX = x2;
             toY = y2;
             prev = pr;
+            flag = flags;
         }
 
         string toString() {        //for debugging
@@ -26,7 +28,8 @@ class Move {
             result += "--" + to_string(fromX) + " " +
                     to_string(fromY) + " " +
                     to_string(toX)   + " " +
-                    to_string(toY)   + "\n";
+                    to_string(toY)   + " " + "flag:" +
+                    to_string(flag)  + "\n";
 
             if (prev != nullptr) {
                 result += to_string(prev->fromX) + " " +
@@ -81,7 +84,7 @@ class Move {
         }
 
         Move reverseMove(){
-            return {toX, toY, fromX, fromY, NULL};
+            return {toX, toY, fromX, fromY, NULL, flag};
         }
 
 };
