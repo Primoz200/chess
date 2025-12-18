@@ -82,32 +82,35 @@ bool makeMove(vector<vector<int>> &board, Move &move, bool isWhite) {
     return true;
 }
 
-void forceMove(vector<vector<int>> &board, Move move, int oldPiece){                
+void forceMove(vector<vector<int>> &board, Move move, int oldPiece, bool ignoreFlags=false){                
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = oldPiece;
 
-    if(move.flag != 0){                     //Force move will be used with reversed moves so relative position is different than normal special move
-        switch(move.flag) {
-            case CASTLE_RIGHT:
-                board[move.fromY][7] = board[move.fromY][move.fromX-1];
-                board[move.fromY][move.fromX-1] = 0;
-                break;
-            case CASTLE_LEFT:
-                board[move.fromY][0] = board[move.fromY][move.fromX+1];
-                board[move.fromY][move.fromX+1] = 0;
-                break;
-            case PROMOTE:
-                board[move.toY][move.toX] = board[move.toY][move.toX] == 5 ? 1 : 7;
-                break;
-            case EN_PASSANT:
-                if(board[move.toY][move.toX] == 1){  //isWhite
-                    board[move.fromY+1][move.fromX] = 7;
-                }else{
-                    board[move.fromY-1][move.fromX] = 1;
-                }
-                break;
-        }
-    } 
+    if(!ignoreFlags){
+        if(move.flag != 0){                     //Force move will be used with reversed moves so relative position is different than normal special move
+            switch(move.flag) {
+                case CASTLE_RIGHT:
+                    board[move.fromY][7] = board[move.fromY][move.fromX-1];
+                    board[move.fromY][move.fromX-1] = 0;
+                    break;
+                case CASTLE_LEFT:
+                    board[move.fromY][0] = board[move.fromY][move.fromX+1];
+                    board[move.fromY][move.fromX+1] = 0;
+                    break;
+                case PROMOTE:
+                    board[move.toY][move.toX] = board[move.toY][move.toX] == 5 ? 1 : 7;
+                    break;
+                case EN_PASSANT:
+                    if(board[move.toY][move.toX] == 1){  //isWhite
+                        board[move.fromY+1][move.fromX] = 7;
+                    }else{
+                        board[move.fromY-1][move.fromX] = 1;
+                    }
+                    break;
+            }   
+        } 
+    }
+    
 }
 
 int checkIfMoveInVector(Move &move, vector<Move> &moves){       //return value is the index of the move + 1 to make enPassant checks easier while also being valid if index = 0
@@ -292,6 +295,8 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
     }
 }
 
+
+//bool executeCurMove(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights); //declaration only
 void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves, Move &lastMove, CastlingRights &castlingRights){
     vector<vector<int>> tempBoard = board;
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
@@ -337,15 +342,18 @@ void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves
                 }
 
                 for(int a = nrGeneratedMoves; a < moves.size(); a++){
+                    CastlingRights tempCastling = {true, true, true, true};
                     int previousPiece = board[moves[a].toY][moves[a].toX];
                     moves[a].prev = &lastMove;
+                    //if(!executeCurMove(tempBoard, moves[a], isWhite, tempCastling)){
                     if(!makeMove(tempBoard, moves[a], isWhite)){
                         moves[a].fromX = 0;
                         moves[a].fromY = 0;
                         moves[a].toX = 0;
                         moves[a].toY = 0;
                     }else{
-                        forceMove(tempBoard, moves[a].reverseMove(), previousPiece);
+                        moves[a].capture = board[moves[a].toY][moves[a].toX];    //sets capture to 0 if not a capture otherwis to piece number
+                        forceMove(tempBoard, moves[a].reverseMove(), previousPiece, true);
                     }
                 }
                 nrGeneratedMoves = moves.size();
@@ -366,7 +374,7 @@ void kings(vector<vector<int>> &board, Move &move, CastlingRights &castlingRight
         board[move.fromY][move.fromX+3] = 0;
     }        
     if(isWhite) {castlingRights.whiteRight = false; castlingRights.whiteLeft = false;}
-    else {castlingRights.blackRight = false; castlingRights.blackRight = false;}
+    else {castlingRights.blackRight = false; castlingRights.blackLeft = false;}
     makeMove(board, move, isWhite);
 }
 
@@ -387,7 +395,7 @@ void pawns(vector<vector<int>> &board, Move move, bool isWhite){
         return;
     }
     makeMove(board, move, isWhite);
-    return;
+    return ;
 }
 
 void rooks(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights){
@@ -482,4 +490,3 @@ int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite){
 }
 //white: pawns:1 rooks:2 knight:3 bishop:4 queen:5 king:6
 //black: pawns:7 rooks:8 knight:9 bishop:10 queen:11 king:12
-

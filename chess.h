@@ -12,6 +12,6 @@ int checkIfMoveInVector(Move &move, vector<Move> &moves);
 void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, int typeOfGame, bool isWhite, CastlingRights& castlingRights, int gamestate);
 void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves, Move &lastMove, CastlingRights &castlingRights);
 int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite);
-void forceMove(vector<vector<int>> &board, Move move, int oldPiece=0);
+void forceMove(vector<vector<int>> &board, Move move, int oldPiece=0, bool ignoreFlags=false);
 
 #endif

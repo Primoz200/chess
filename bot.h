@@ -6,3 +6,4 @@
 
 using namespace std;
 string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite, CastlingRights& castlingRights, int gamestate);
+int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves);

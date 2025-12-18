@@ -12,14 +12,16 @@ class Move {
         int toY;
         Move* prev;
         int flag;
+        int capture;
 
-        Move(int x1, int y1, int x2, int y2, Move* pr, int flags = 0) {
+        Move(int x1, int y1, int x2, int y2, Move* pr, int flags = 0, int captures = 0) {
             fromX = x1;
             fromY = y1;
             toX = x2;
             toY = y2;
             prev = pr;
             flag = flags;
+            capture = captures;
         }
 
         string toString() {        //for debugging
