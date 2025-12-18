@@ -142,7 +142,7 @@ void postGameOutput(int endState){
 
 int main() {
     vector<vector<int>> board(8, vector<int>(8, 0));
-    setUpBoard(board, "r1b2r1k/pppp2pp/2n5/5p2/1qB4P/4P1N1/P2K1PP1/Q2R4");
+    setUpBoard(board);
 
     CastlingRights castlingRights;
     resetCastlingRights(&castlingRights);
