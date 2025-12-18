@@ -95,7 +95,8 @@ int gameLoop(vector<vector<int>> &board, bool isWhite, CastlingRights &castlingR
         //cout << evaluate(board, gameState, moves);
 
         // for(auto a: moves) {
-        //      cout << a.toString();
+        //     if(a.isNull()) continue;
+        //     cout << a.toString();
         // }
 
         gameState = getGameState(board, moves, isWhite);

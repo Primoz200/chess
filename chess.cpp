@@ -71,12 +71,13 @@ bool kingInCheck(vector<vector<int>> &board, bool isWhite){ //retruns true if ki
 }
 
 bool makeMove(vector<vector<int>> &board, Move &move, bool isWhite) {
+    int oldPiece = board[move.toY][move.toX];
     board[move.toY][move.toX] = board[move.fromY][move.fromX];
     board[move.fromY][move.fromX] = 0;
 
    if(kingInCheck(board, isWhite)) {
         board[move.fromY][move.fromX] = board[move.toY][move.toX];
-        board[move.toY][move.toX] = 0;
+        board[move.toY][move.toX] = oldPiece;
         return false;
     }
     return true;
@@ -168,13 +169,14 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
     vector<vector<int>> tempBoard = board;
     for(int x = -1; x <= 1; x++){
         for(int y = -1; y <= 1; y++){
-            if(getBitNr(move.fromX+x, move.fromY+y) >= 64 || getBitNr(move.fromX+x, move.fromY+y) < 0) continue;    //if clause is true the square is outside of the board
             if(x == 0 && y == 0) continue;
+            if(getBitNr(move.fromX+x, move.fromY+y) >= 64 || getBitNr(move.fromX+x, move.fromY+y) < 0) continue;    //if clause is true the square is outside of the board
             if(tempBoard[move.fromY+y][move.fromX+x] == 0){
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
                 tempBoard[move.fromY][move.fromX] = 0;
                 if(!kingInCheck(tempBoard, isWhite)){
                     moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
+                    continue;
                 }
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
                 tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];
@@ -182,7 +184,7 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 if(isWhite) continue;
             }else if(tempBoard[move.fromY+y][move.fromX+x] >= 7){
                 if(!isWhite) continue;   
-        }
+            }
             tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
             tempBoard[move.fromY][move.fromX] = 0;
             if(!kingInCheck(tempBoard, isWhite)){
@@ -299,6 +301,7 @@ void generateKnightMoves(vector<vector<int>> &board, vector<Move> &initial, Move
 //bool executeCurMove(vector<vector<int>> &board, Move move, bool isWhite, CastlingRights &castlingRights); //declaration only
 void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves, Move &lastMove, CastlingRights &castlingRights){
     vector<vector<int>> tempBoard = board;
+    
     Move refMove = {0, 0, 0, 0, &lastMove};      //this move is used only for its fromX and fromY values, its not supposed to be played. Pointer must be right in case of enpassant blocks
     moves.clear();
 

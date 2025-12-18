@@ -89,6 +89,7 @@ void printBoard2(vector<vector<int>> &v) {
 }
 vector<Move> list;
 vector<vector<vector<int>>> boards;
+vector<vector<Move>> generatedMoves;
 int counter = 0;
 int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
     int eval = 0;
@@ -127,12 +128,7 @@ int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
         }
     }
 
-    if(whiteKingPosition.second == -1 ){
-        for(int i = 0; i < 6; i++){
-            cout << list[i].toString();
-            printBoard2(boards[i]); 
-        }
-    }
+    
     if(pieceCount > 10){        //arbitratry selected piece number for when it transitions into an endgame
         eval+= kingValueMiddleGame[whiteKingPosition.second][whiteKingPosition.first];
         eval+= -kingValueMiddleGame[7 - blackKingPosition.second][blackKingPosition.first];
@@ -164,6 +160,7 @@ int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlin
         executeCurMove(board, moves[i], isWhite, castlingRights);
         list[depth] = moves[i];
         boards[depth] = board;
+        generatedMoves[depth] = moves;
         int newValue = alpha_beta(board, !isWhite, castlingRights, moves[i], depth+1, alpha, beta);
         forceMove(board, moves[i].reverseMove(), oldPiece);
         castlingRights = oldCastling;
@@ -193,6 +190,7 @@ string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite,
     for(int i = 0; i < 10; i++){
     list.push_back({0, 0, 0, 0, NULL});
     boards.push_back(board);
+    generatedMoves.push_back(moves);
     }
 
     //shuffleVector(moves);
