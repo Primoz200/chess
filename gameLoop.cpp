@@ -141,6 +141,10 @@ void postGameOutput(int endState){
 }
 
 int main() {
+    #ifdef WIN_32           //makes unicode chars work
+        SetConsoleOutputCP(CP_UTF8);
+    #endif
+
     vector<vector<int>> board(8, vector<int>(8, 0));
     setUpBoard(board);
 

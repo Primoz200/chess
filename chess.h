@@ -13,5 +13,4 @@ void getMove(string &strMove, vector<vector<int>> &board, vector<Move> &moves, i
 void generateMoves(vector<vector<int>> &board, bool isWhite, vector<Move> &moves, Move &lastMove, CastlingRights &castlingRights);
 int getGameState(vector<vector<int>> &board, vector<Move> &moves, bool isWhite);
 void forceMove(vector<vector<int>> &board, Move move, int oldPiece=0, bool ignoreFlags=false);
-
 #endif
