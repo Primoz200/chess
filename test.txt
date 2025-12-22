@@ -1,6 +1,0 @@
-e2e4 a7a5
-e4e5 a5a4
-e5e6 d7d6
-e6f7 e8d7
-f7g8 a4a3
-q
