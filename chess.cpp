@@ -40,7 +40,7 @@ void resetCastlingRights(CastlingRights* rights, pair<pair<bool, bool>, pair<boo
 
 void setUpBoard(vector<vector<int>>  &v, string fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR") {
     int nextSquare = 0;
-    for(char a : fen){          //2r4k/2p1PQpp/q7/4p2/2n2P2/2P3P1/P6P/5K2
+    for(char a : fen){          
         if(a == '/') continue;  
         if(isdigit(a)){
             for(int i = 0; i < a - '0'; i++){
@@ -176,7 +176,6 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 tempBoard[move.fromY][move.fromX] = 0;
                 if(!kingInCheck(tempBoard, isWhite)){
                     moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
-                    continue;
                 }
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
                 tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];

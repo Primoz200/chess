@@ -6,6 +6,7 @@
 #include <map>
 #include "chess.h"
 #include <iostream>
+#include "bitBoards.h"
 
 #define IN_GAME 1
 #define WHITE_WIN 2
@@ -32,8 +33,8 @@ const vector<vector<int>> pawnValue = {
     {12, 11, 11, 12, 12, 11, 11, 12},
     {10, 10, 11, 13, 13, 11, 10, 10},
     {10, 10, 11, 14, 14, 11, 10, 10},
-    {10, 10, 10, 12, 12, 10, 10, 10},
-    {9, 10, 10, 10, 10, 10, 10, 9},
+    {10, 10, 11, 11, 11, 11, 10, 10},
+    {10, 10, 10, 10, 10, 10, 10, 10},
     {10, 10, 10, 10, 10, 10, 10, 10}
 };
 
@@ -46,6 +47,17 @@ const vector<vector<int>> knightValue = {
     {26, 30, 33, 32, 32, 33, 30, 26},
     {26, 28, 30, 30, 30, 30, 28, 26},
     {24, 26, 28, 28, 28, 28, 26, 24}
+};
+
+const vector<std::vector<int>> bishopValue = {
+    {32, 32, 32, 32, 32, 32, 32, 32},
+    {32, 33, 33, 33, 33, 33, 33, 32},
+    {32, 33, 34, 34, 34, 34, 33, 32},
+    {32, 33, 34, 35, 35, 34, 33, 32},
+    {32, 33, 34, 35, 35, 34, 33, 32},
+    {32, 33, 34, 34, 34, 34, 33, 32},
+    {32, 33, 33, 33, 33, 33, 33, 32},
+    {32, 32, 32, 32, 32, 32, 32, 32}
 };
 
 const vector<vector<int>> kingValueMiddleGame = {
@@ -101,6 +113,8 @@ int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
     if(gamestate == WHITE_WIN) return 10000;
     if(gamestate == BLACK_WIN) return -10000;
 
+    auto attackBoards = attackBitBoards(board);
+
     for(int x = 0; x < 8; x++){
         for(int y = 0; y < 8; y++){
             int piece = board[y][x];
@@ -123,8 +137,14 @@ int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
             }
             else if(piece % 6 == 3){
                 eval += colorMultiplier(piece) * knightValue[x][y];
+            }else if(piece % 6 == 4){
+                eval += colorMultiplier(piece) * bishopValue[x][y];
             }
             else{ eval += colorMultiplier(piece) * pieceWorth[piece % 6];}
+
+            // int attackBoardShift = x*1 + y*8; //checks one bit every iteration so we dont need to make another 64 iterations loop
+            // if(attackBoards.first & (1 << attackBoardShift)) eval += 2;
+            // if(attackBoards.second & (1 << attackBoardShift)) eval -= 2;
         }
     }
 
