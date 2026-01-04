@@ -14,10 +14,11 @@
 #define STALEMATE 4
 #define DRAW 5
 
-#define MAX_DEPTH 3
+#define MAX_DEPTH 4
 
 using namespace std;
 
+int INF = 10000; 
 map<int, int> pieceWorth = {
     {1, 10},
     {2, 50},
@@ -49,15 +50,15 @@ const vector<vector<int>> knightValue = {
     {24, 26, 28, 28, 28, 28, 26, 24}
 };
 
-const vector<std::vector<int>> bishopValue = {
-    {32, 32, 32, 32, 32, 32, 32, 32},
+const vector<vector<int>> bishopValue = {
+    {32, 31, 31, 31, 31, 31, 31, 32},
     {32, 33, 33, 33, 33, 33, 33, 32},
     {32, 33, 34, 34, 34, 34, 33, 32},
     {32, 33, 34, 35, 35, 34, 33, 32},
     {32, 33, 34, 35, 35, 34, 33, 32},
     {32, 33, 34, 34, 34, 34, 33, 32},
     {32, 33, 33, 33, 33, 33, 33, 32},
-    {32, 32, 32, 32, 32, 32, 32, 32}
+    {32, 31, 31, 31, 31, 31, 31, 32}
 };
 
 const vector<vector<int>> kingValueMiddleGame = {
@@ -106,12 +107,11 @@ int counter = 0;
 int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
     int eval = 0;
     int pieceCount=0;
+    int mobility = 0;
     pair<int,int> whiteKingPosition = {-1, -1};
     pair<int,int> blackKingPosition = {-1, -1};
 
     if(gamestate == DRAW || gamestate == STALEMATE) return 0;
-    if(gamestate == WHITE_WIN) return 10000;
-    if(gamestate == BLACK_WIN) return -10000;
 
     auto attackBoards = attackBitBoards(board);
 
@@ -142,18 +142,22 @@ int evaluate(vector<vector<int>> &board, int gamestate, vector<Move> &moves){
             }
             else{ eval += colorMultiplier(piece) * pieceWorth[piece % 6];}
 
-            // int attackBoardShift = x*1 + y*8; //checks one bit every iteration so we dont need to make another 64 iterations loop
-            // if(attackBoards.first & (1 << attackBoardShift)) eval += 2;
-            // if(attackBoards.second & (1 << attackBoardShift)) eval -= 2;
+            int attackBoardShift = x*1 + y*8; //checks one bit every iteration so we dont need to make another 64 iterations loop
+            if(attackBoards.first & (1 << attackBoardShift)) mobility += 3;
+            if(attackBoards.second & (1 << attackBoardShift)) mobility -= 3;
         }
     }
 
     
-    if(pieceCount > 10){        //arbitratry selected piece number for when it transitions into an endgame
+    if(pieceCount > 12){        //arbitratry selected piece number for when it transitions into an endgame
         eval+= kingValueMiddleGame[whiteKingPosition.second][whiteKingPosition.first];
         eval+= -kingValueMiddleGame[7 - blackKingPosition.second][blackKingPosition.first];
     }else {
-    }//else endgame table
+        eval += knightValue[whiteKingPosition.second][whiteKingPosition.first];
+        eval -= knightValue[blackKingPosition.second][blackKingPosition.first];
+
+        eval += mobility;
+    }
 
     return eval;
 }
@@ -165,12 +169,15 @@ int alpha_beta(vector<vector<int>> &board, bool isWhite, CastlingRights& castlin
     generateMoves(board, isWhite, moves, lastMove, castlingRights);
     int gamestate = getGameState(board, moves, isWhite);
     
-    if(depth > MAX_DEPTH || gamestate != IN_GAME){
+    if(gamestate == WHITE_WIN) return INF - depth;
+    if(gamestate == BLACK_WIN) return -INF + depth;
+
+    if(depth >= MAX_DEPTH || gamestate != IN_GAME){
         return evaluate(board, gamestate, moves);
     }
 
 
-    int bestValue = isWhite ? -10001 : 10001;
+    int bestValue = isWhite ? -INF : INF;
 
     for(int i = 0; i < moves.size(); i++){
         if(moves[i].isNull()) continue;
@@ -202,9 +209,9 @@ string getBotMove(vector<vector<int>> &board, vector<Move> &moves, bool isWhite,
     string s = "";
     vector<vector<int>> tempBoard(8, vector<int>(8, 0));
     CastlingRights newCastlingRights;
-    int currentBestEval = isWhite ? -10001 : 10001;
-    int alpha = -10001;
-    int beta = 10001;
+    int currentBestEval = isWhite ? -INF : INF;
+    int alpha = -INF;
+    int beta = INF;
     int indMove = -1;
 
     for(int i = 0; i < 10; i++){

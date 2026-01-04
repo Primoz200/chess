@@ -89,6 +89,10 @@ class Move {
             return {toX, toY, fromX, fromY, NULL, flag};
         }
 
+        int score(){
+            if(this->isNull()) return 0;
+            else return 1;
+        }
 };
 
 #endif

@@ -179,18 +179,20 @@ void generateKingMoves(vector<vector<int>> &board, vector<Move>& moves, Move &mo
                 }
                 tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
                 tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];
-            }else if(tempBoard[move.fromY+y][move.fromX+x] <= 6){
-                if(isWhite) continue;
-            }else if(tempBoard[move.fromY+y][move.fromX+x] >= 7){
-                if(!isWhite) continue;   
-            }
-            tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
-            tempBoard[move.fromY][move.fromX] = 0;
-            if(!kingInCheck(tempBoard, isWhite)){
-                moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
-            }
-            tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
-            tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];    
+            }else{
+                if(tempBoard[move.fromY+y][move.fromX+x] <= 6){
+                    if(isWhite) continue;
+                }else if(tempBoard[move.fromY+y][move.fromX+x] >= 7){
+                    if(!isWhite) continue;   
+                }
+                tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY][move.fromX];
+                tempBoard[move.fromY][move.fromX] = 0;
+                if(!kingInCheck(tempBoard, isWhite)){
+                    moves.push_back({move.fromX, move.fromY, move.fromX+x, move.fromY+y, NULL});
+                }
+                tempBoard[move.fromY+y][move.fromX+x] = board[move.fromY+y][move.fromX+x];
+                tempBoard[move.fromY][move.fromX] = board[move.fromY][move.fromX];  
+            }  
         }
     }
 
